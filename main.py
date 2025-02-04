@@ -21,7 +21,20 @@ from Shamirss import ShamirSecretSharing
 # resultado = polinomio.eval(x)
 # print(f"El polinomio evaluado en x={x} es {resultado}")
 
-p1 = ShamirSecretSharing(11, 7, 5)
 
-print(p1.generate_shares(2))
+if __name__ == "__main__":
 
+    primo = 11
+    secreto = 7
+    num_shares = 5
+
+    p1 = ShamirSecretSharing(primo, secreto, num_shares)
+
+    shares = p1.generate_shares(2)
+    print("Shares:", *shares)
+
+    # Recuperamos el secreto a partir de las partes
+    
+    recuperado = ShamirSecretSharing.recuperar_secreto(shares, primo)
+    print(f"Secreto recuperado: {recuperado}")
+    
