@@ -38,7 +38,7 @@ class ShamirSecretSharing:
 
     Métodos:
     --------
-    __init__(prime: int, secret: Field, num_shares: int):
+    __init__(secret: Field, num_shares: int):
         Inicializa la instancia con el número primo, el secreto y el número de partes.
 
     generate_shares(t: int, prime: int) -> list[SecretShare]:
@@ -47,8 +47,7 @@ class ShamirSecretSharing:
     recuperar_secreto(shares: list[SecretShare], primo: int) -> Field:
         Recupera el secreto mediante interpolación de Lagrange en un campo finito.
     """
-    def __init__(self, prime: int, secret: Field, num_shares: int):
-        self.prime = prime
+    def __init__(self, secret: Field, num_shares: int):
         self.secret = secret
         self.num_shares = num_shares
 

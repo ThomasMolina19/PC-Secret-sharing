@@ -28,7 +28,7 @@ if __name__ == "__main__":
     secreto = Field(7, primo)
     num_shares = 5
 
-    p1 = ShamirSecretSharing(primo, secreto, num_shares)
+    p1 = ShamirSecretSharing(secreto, num_shares)
 
     shares = p1.generate_shares(2, primo)
     print("Shares:", *shares)
