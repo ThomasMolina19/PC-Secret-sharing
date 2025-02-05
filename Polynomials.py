@@ -39,6 +39,8 @@ class Polynomio:
 
     def eval(self, x: Field) -> Field:
         mod = self.coefs[0].mod
+        if x.mod != mod:
+            raise ValueError("El campo de evaluación no coincide con el campo del polinomio.")
 
         result = Field(0, mod)
         x_power = Field(1, mod)

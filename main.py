@@ -35,6 +35,6 @@ if __name__ == "__main__":
 
     # Recuperamos el secreto a partir de las partes
     
-    recuperado = ShamirSecretSharing.recuperar_secreto(shares, primo)
+    recuperado = ShamirSecretSharing.recuperar_secreto(shares)
     print(f"Secreto recuperado: {recuperado}")
     

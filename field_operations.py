@@ -30,6 +30,8 @@ class Field:
         TypeError: Si el objeto con el que se intenta sumar no es una instancia de Field.
         """
         if isinstance(other, Field):
+            if self.mod != other.mod:
+                raise ValueError("No se puede operar dos campos con módulos diferentes")
             return Field(self.value + other.value, self.mod)
         raise TypeError("No se puede sumar un campo con algo que no sea un campo")
 
@@ -47,6 +49,8 @@ class Field:
         TypeError: Si el objeto con el que se intenta restar no es una instancia de Field.
         """
         if isinstance(other, Field):
+            if self.mod != other.mod:
+                raise ValueError("No se puede operar dos campos con módulos diferentes")
             return Field(self.value - other.value, self.mod)
         raise TypeError("No se puede restar un campo con algo que no sea un campo")
 
@@ -64,6 +68,8 @@ class Field:
         TypeError: Si el objeto con el que se intenta multiplicar no es una instancia de Field.
         """
         if isinstance(other, Field):
+            if self.mod != other.mod:
+                raise ValueError("No se puede operar dos campos con módulos diferentes")
             return Field(self.value * other.value, self.mod)
         raise TypeError("No se puede multiplicar un campo con algo que no sea un campo")
 
@@ -81,6 +87,8 @@ class Field:
         TypeError: Si el objeto con el que se intenta elevar no es una instancia de Field.
         """
         if isinstance(other, Field):
+            if self.mod != other.mod:
+                raise ValueError("No se puede operar dos campos con módulos diferentes")
             return Field(pow(self.value, other.value, self.mod), self.mod)
         raise TypeError("No se puede elevar un campo con algo que no sea un campo")
 

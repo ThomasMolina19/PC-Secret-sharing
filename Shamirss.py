@@ -59,6 +59,8 @@ class ShamirSecretSharing:
         -----------
         t : int
             Número mínimo de partes necesarias para reconstruir el secreto.
+        prime : int
+            Número primo utilizado para las operaciones en el campo finito.
         
         Retorna:
         --------
@@ -74,7 +76,7 @@ class ShamirSecretSharing:
         return shares
     
     @staticmethod
-    def recuperar_secreto(shares: list[SecretShare], primo: int) -> Field:
+    def recuperar_secreto(shares: list[SecretShare]) -> Field:
         """
         Recupera el secreto mediante interpolación de Lagrange en un campo finito.
         
@@ -82,14 +84,14 @@ class ShamirSecretSharing:
         -----------
         shares : list[SecretShare]
             Lista de partes del secreto.
-        primo : int
-            Número primo utilizado para la aritmética modular.
         
         Retorna:
         --------
         Field
             Secreto recuperado (f(0) mod primo).
         """
+
+        primo = shares[0].valor.mod
         secret = Field(0, primo)
 
         for i in range(len(shares)):
