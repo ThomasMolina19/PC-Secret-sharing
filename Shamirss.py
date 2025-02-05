@@ -31,28 +31,28 @@ class ShamirSecretSharing:
     -----------
     prime : int
         Número primo utilizado para las operaciones en el campo finito.
-    secret : int
+    secret : Field
         Secreto a compartir.
     num_shares : int
         Número total de partes generadas.
 
     Métodos:
     --------
-    __init__(prime: int, secret: int, num_shares: int):
+    __init__(prime: int, secret: Field, num_shares: int):
         Inicializa la instancia con el número primo, el secreto y el número de partes.
 
-    generate_shares(t: int) -> list[SecretShare]:
-        Genera las partes del secreto usando un polinomio aleatorio de grado t-1.
+    generate_shares(t: int, prime: int) -> list[SecretShare]:
+        Genera las partes del secreto usando un polinomio aleatorio de grado t-1, a través de evaluaciones en el campo primo.
     
     recuperar_secreto(shares: list[SecretShare], primo: int) -> Field:
         Recupera el secreto mediante interpolación de Lagrange en un campo finito.
     """
-    def __init__(self, prime: int, secret: int, num_shares: int):
+    def __init__(self, prime: int, secret: Field, num_shares: int):
         self.prime = prime
         self.secret = secret
         self.num_shares = num_shares
 
-    def generate_shares(self, t: int) -> list[SecretShare]:
+    def generate_shares(self, t: int, prime: int) -> list[SecretShare]:
         """
         Genera las partes del secreto utilizando un polinomio aleatorio de grado t-1.
         
@@ -69,7 +69,7 @@ class ShamirSecretSharing:
         shares = []
         coeficientes_polinomio = Polynomio.random(t, self.secret)
         for i in range(1, self.num_shares + 1):
-            shares.append(SecretShare(indice=i, valor=Field(coeficientes_polinomio.eval(i), self.prime)))
+            shares.append(SecretShare(indice=i, valor=coeficientes_polinomio.eval(Field(i, prime))))
         
         print(f"Shares generados bajo el polinomio: {coeficientes_polinomio}")
         return shares

@@ -25,12 +25,12 @@ from Shamirss import ShamirSecretSharing
 if __name__ == "__main__":
 
     primo = 11
-    secreto = 7
+    secreto = Field(7, primo)
     num_shares = 5
 
     p1 = ShamirSecretSharing(primo, secreto, num_shares)
 
-    shares = p1.generate_shares(2)
+    shares = p1.generate_shares(2, primo)
     print("Shares:", *shares)
 
     # Recuperamos el secreto a partir de las partes

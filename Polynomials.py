@@ -1,4 +1,5 @@
 import random
+from field_operations import Field
 
 class Polynomio:
     """
@@ -23,7 +24,7 @@ class Polynomio:
     __str__() -> str:
         Devuelve una representación en cadena del polinomio.
     """
-    def __init__(self, coefs: list[int]):
+    def __init__(self, coefs: list[Field]):
         self.coefs = coefs
 
     '''
@@ -31,16 +32,16 @@ class Polynomio:
     De esta forma, el polinomio es de la forma p(x) = x + a_1x + a_2x^2 + ... + a_nx^n
     '''
     @staticmethod
-    def random(t: int, secret: int):
-        minint: int = 0 
-        maxint: int = secret-1
-        coefs = [random.randint(minint, maxint) for _ in range(t + 1)]
+    def random(t: int, secret: Field) -> 'Polynomio':
+        coefs = [Field.random(secret.mod) for _ in range(t + 1)]
         coefs[0] = secret
         return Polynomio(coefs)
 
-    def eval(self, x: int):
-        result = 0
-        x_power = 1
+    def eval(self, x: Field) -> Field:
+        mod = self.coefs[0].mod
+
+        result = Field(0, mod)
+        x_power = Field(1, mod)
         for coef in self.coefs:
             result += coef * x_power
             x_power *= x
