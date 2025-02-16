@@ -1,4 +1,4 @@
-Proyecto Secreto Compartido
+# Proyecto Secreto Compartido
 
 Este proyecto busca implementar un protocolo de comunicación que permite que n partes
 calculen juntos una función usando datos privados sin revelar a las otras partes sus datos.
