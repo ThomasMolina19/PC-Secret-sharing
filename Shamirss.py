@@ -45,7 +45,7 @@ class ShamirSecretSharing:
             s_i.append(coeficientes_polinomio.eval(i))
         print(coeficientes_polinomio)
         print(s_i)
-        for i in range(0, 5):
+        for i in range(0, self.num_shares):
             s_i[i]=Field(int(s_i[i]), 11)
             print(s_i[i])
         return s_i
