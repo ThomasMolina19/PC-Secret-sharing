@@ -30,7 +30,7 @@ if __name__ == "__main__":
 
     p1 = ShamirSecretSharing(secreto, num_shares)
 
-    shares = p1.generate_shares(2, primo)
+    shares = p1.generate_shares(2)
     print("Shares:", *shares)
 
     # Recuperamos el secreto a partir de las partes
