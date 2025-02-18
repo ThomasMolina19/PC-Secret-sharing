@@ -3,21 +3,21 @@ from Polynomials import Polynomio
 from Shamirss import ShamirSecretSharing
 from Lagrange import lagrange_interpolation
 
-
 if __name__ == "__main__":
     secrets = []
     prime = (2**17) - 1
 
     #Secretos de cada jugador
-    print(f"Ingrese el secreto de cada jugador, y presione -1 para terminar de ingresar secretos. Se trabajará sobre Zp, p= {prime}: ")
+    print(f"Ingrese el secreto de cada jugador, y presione 's' para terminar de ingresar secretos. Se trabajará sobre Zp, p= {prime}: ")
     while True:
         try:
-            secret = int(input("Ingrese el número secreto (mod p): "))
-            if secret == -1 and len(secrets) > 0:
+            secret = input("Ingrese el número secreto (mod p): ")
+            if secret == "s" and len(secrets) > 0:
                 break
-            elif secret == -1 and len(secrets) == 0:
+            elif secret == "s" and len(secrets) == 0:
                 print("Ingrese al menos un secreto.")
             else:
+                secret = int(secret)
                 secrets.append(Field(secret,prime).value)
         except:
             print("Ingrese un número válido.")
@@ -33,7 +33,7 @@ if __name__ == "__main__":
         shares.append([(i + 1, polynomial[i]) for i in range(len(polynomial))])
         print(polynomial)
     
-    print("Shares:", shares)
+    print("Fragmentos:", shares)
     
     # Combinar fragmentos
     combined_shares = []
@@ -47,13 +47,14 @@ if __name__ == "__main__":
             
         combined_shares.append((x_value, Field(y_product, prime).value))
     
-    print("Combined Shares:", combined_shares)
+    print("Fragmentos combinados:", combined_shares)
     
     # Reconstruir secretos individuales
     for idx, share_set in enumerate(shares):
         secret = lagrange_interpolation(share_set, prime)
-        print(f"The reconstructed secret {idx + 1} is: {secret}")
+        print(f"El secreto reconstruido {idx + 1} es: {secret}")
     
     # Reconstruir el secreto combinado
     combined_secret = lagrange_interpolation(combined_shares, prime)
-    print(f"The reconstructed combined secret is: {combined_secret}")
+    print(f"El secreto reconstruido combinado es: {combined_secret}")
+
