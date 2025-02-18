@@ -128,3 +128,4 @@ class Field:
         Field: Una nueva instancia de Field con un valor aleatorio en el rango [0, mod-1].
         """
         return Field(random.randint(0, mod - 1), mod)
+

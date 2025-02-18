@@ -1,4 +1,5 @@
 import random
+from field_operations import Field
 
 class Polynomio:
     """
@@ -31,11 +32,11 @@ class Polynomio:
     De esta forma, el polinomio es de la forma p(x) = x + a_1x + a_2x^2 + ... + a_nx^n
     '''
     @staticmethod
-    def random(t: int, secret: int):
+    def random(t: int, secret: int, prime: int):
         minint: int = 0 
-        maxint: int = secret-1
-        coefs = [random.randint(minint, maxint) for _ in range(t + 1)]
-        coefs[0] = secret
+        maxint: int = prime
+        coefs = [ Field(random.randint(minint, maxint),prime).value for _ in range(t + 1)]
+        coefs[0] = Field(secret,prime).value
         return Polynomio(coefs)
 
     def eval(self, x: int):
@@ -51,3 +52,4 @@ class Polynomio:
         for i, coef in enumerate(self.coefs):
             terms.append(f"{coef}x^{i}")
         return " + ".join(terms)
+
