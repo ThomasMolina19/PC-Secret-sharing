@@ -1,6 +1,6 @@
 from socket import AF_INET, SOCK_STREAM, socket as Socket
 import threading
-import uuid
+import uuid as UUID
 
 from field_operations import Field
 from Shamirss import SecretShare, ShamirSecretSharing
@@ -32,7 +32,7 @@ class NetworkUser:
     """
 
     def __init__(self, host: Socket, uuid_str: str = None):
-        self.uuid = uuid_str if uuid_str else str(uuid.uuid4())
+        self.uuid = uuid_str if uuid_str else str(UUID.uuid4())
         self.host = host
         self.ip, self.port = self.host.getpeername()
 
@@ -119,7 +119,7 @@ class MainUser():
         
         self.ip: str = ip
         self.port: int = port
-        self.uuid: str = uuid if uuid is not None else str(uuid.uuid4())
+        self.uuid: str = uuid if uuid is not None else str(UUID.uuid4())
 
         self.party: list[NetworkUser] = []
     
@@ -161,7 +161,7 @@ class MainUser():
                 break
     
     def log(self, message: str):
-        print(f"[{self.uuid}] {message}")
+        print(f"\n[{self.uuid}] {message}")
 
     def connect(self, ip: str, port: int):
         """
@@ -211,6 +211,13 @@ class MainUser():
         secret = ShamirSecretSharing.recuperar_secreto(self.shares)
         return secret
 
+    def broadcast(self, message: str):
+        """
+        Envía un mensaje a todos los usuarios conectados.
+        """
+
+        for user in self.party:
+            user.send(f"MENSAJE={message}")
 
     def add_connection(self, ip: str, port: int, uuid: str) -> NetworkUser:
         """
