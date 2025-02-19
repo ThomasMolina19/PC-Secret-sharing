@@ -9,7 +9,6 @@ class Party:
 
     def generate_party(self):
         n = self.number_players
-        polynomial_degree = (n - 1) // 2
 
         party_shares = {}
         secrets = []
@@ -24,7 +23,7 @@ class Party:
                     print("Ingrese un número válido.")
 
             shamir = ShamirSecretSharing(self.field, secret, n)
-            shares = shamir.generate_shares(polynomial_degree)
+            shares = shamir.generate_shares(n-1)
             print(shares)
             
             party_shares[f"p_{i}"] = shares
@@ -39,4 +38,5 @@ class Party:
             for j, key in enumerate(party_shares.keys()):
                 mixed_shares[f"p_{i + 1}"].append(party_shares[key][i])
         return mixed_shares
+        
 

@@ -38,7 +38,7 @@ class ShamirSecretSharing:
         self.num_shares = num_shares
 
     def generate_shares(self, t):
-        if t <= self.num_shares:
+        if t < self.num_shares:
             s_i = []
             coeficientes_polinomio = Polynomio.random(t, self.secret, self.prime)
             for i in range(1, self.num_shares + 1):
