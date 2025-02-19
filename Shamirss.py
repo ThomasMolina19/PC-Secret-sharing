@@ -44,9 +44,9 @@ class ShamirSecretSharing:
             for i in range(1, self.num_shares + 1):
                 s_i.append(coeficientes_polinomio.eval(i))
             print(coeficientes_polinomio)
-            # print(s_i)
             for i in range(0, self.num_shares):
                 s_i[i]=Field(int(s_i[i]), self.prime).value
             return s_i
         else:
             raise ValueError("El valor de t debe ser menor o igual que el número total de partes")
+

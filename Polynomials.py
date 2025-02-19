@@ -36,7 +36,7 @@ class Polynomio:
         minint: int = 0 
         maxint: int = prime
         coefs = [ Field(random.randint(minint, maxint),prime).value for _ in range(t + 1)]
-        coefs[0] = Field(secret,prime).value
+        coefs[0] = Field(secret, prime).value
         return Polynomio(coefs)
 
     def eval(self, x: int):

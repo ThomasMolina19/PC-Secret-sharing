@@ -27,7 +27,7 @@ if __name__ == "__main__":
     shares = []
     for secret in secrets:
         # Generar fragmentos para cada secreto
-        polynomial = ShamirSecretSharing(prime, secret, len(secrets)).generate_shares(polynomial_degree)
+        polynomial = ShamirSecretSharing(prime, secret, len(secrets) + 1).generate_shares(polynomial_degree)
         
         #Agregar las parejas (x, f(x)) a la lista de fragmentos, que son la evaluación de x en el polinomio aleatorio
         shares.append([(i + 1, polynomial[i]) for i in range(len(polynomial))])
@@ -57,4 +57,3 @@ if __name__ == "__main__":
     # Reconstruir el secreto combinado
     combined_secret = lagrange_interpolation(combined_shares, prime)
     print(f"El secreto reconstruido combinado es: {combined_secret}")
-
