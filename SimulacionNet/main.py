@@ -1,4 +1,6 @@
 import argparse
+from Party import Party
+
 
 def leer_archivo(input_file):
     valores = []
@@ -37,12 +39,17 @@ def main():
     # Agregar el número proporcionado por el usuario (si existe)
     if args.numero is not None:
         p = args.numero
-        valores.append(p)
-        print(f"\nNúmero {p+1} agregado a la lista.")
+        print(f"\nEl campo a trabajar es Z_{p}\n")
 
-    # Mostrar la lista final de valores
-    print("\nLista final de valores:")
-    print(valores)
+    number_players = len(valores)
+   
+    # Crear una instancia de la clase Party
+    party = Party(p,number_players)
+    a=party.generate_party(valores)
+    print("\nFragmentos despues de la reparticion:")
+    print(a)
+
+    
 
 if __name__ == "__main__":
     main()

@@ -1,7 +1,6 @@
 from Polynomials import Polynomio
 from field_operations import Field
 
-
 class ShamirSecretSharing:
     """
     Clase para implementar el esquema de compartición de secretos de Shamir.
@@ -39,17 +38,18 @@ class ShamirSecretSharing:
         self.num_shares = num_shares
 
     def generate_shares(self, t):
-        s_i = []
-        coeficientes_polinomio = Polynomio.random(t, self.secret)
-        for i in range(1, self.num_shares + 1):
-            s_i.append(coeficientes_polinomio.eval(i))
-        print(coeficientes_polinomio)
-        print(s_i)
-        for i in range(0, self.num_shares):
-            s_i[i]=Field(int(s_i[i]), 11)
-            print(s_i[i])
-        return s_i
-        
+        if t <= self.num_shares:
+            s_i = []
+            coeficientes_polinomio = Polynomio.random(t, self.secret, self.prime)
+            for i in range(1, self.num_shares + 1):
+                s_i.append(coeficientes_polinomio.eval(i))
+            print(f"\nCoeficientes del polinomio agignado al numero P_{i}:")
+            print(coeficientes_polinomio)
+            for i in range(0, self.num_shares):
+                s_i[i]=Field(int(s_i[i]), self.prime).value
+            return s_i
+        else:
+            raise ValueError("El valor de t debe ser menor o igual que el número total de partes")
 
 
 
