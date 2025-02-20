@@ -53,9 +53,11 @@ class CommandHandler:
         self.main_user.connect(ip, int(port))
         print(f"Conectado a {ip}:{port}")
 
-    def send_message(self, message):
+    def send_message(self, *message):
         # Se envía un mensaje a todos los usuarios conectados.
-        self.main_user.broadcast(message)
+        # Por como se implementó, el mensaje debe ser una lista de strings.
+        # Se envía el mensaje unido por espacios.
+        self.main_user.broadcast(" ".join(message))
         print(f"Mensaje enviado: {message}")
 
     def send_number(self):

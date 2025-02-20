@@ -70,7 +70,6 @@ class ShamirSecretSharing:
         for i in range(1, self.num_shares + 1):
             shares.append(SecretShare(indice=i, valor=coeficientes_polinomio.eval(Field(i, self.secret.mod))))
         
-        print(f"Shares generados bajo el polinomio: {coeficientes_polinomio}")
         return shares
     
     def __str__(self):
