@@ -1,116 +1,104 @@
 from field_operations import Field
-from Shamirss import ShamirSecretSharing, SecretShare
 from Networking import MainUser
 
-# a=Field(3, 7)
-# b=Field(9, 7)
-# c=a+b
-# print(c)
-# print(b)
+# Clase que maneja los comandos por consola.
+class CommandHandler:
+    def __init__(self, main_user: MainUser):
+        self.main_user: MainUser = main_user
 
-# j = 11  # Elegimos un primo, por ejemplo, 7, para trabajar en Z7
+        # Lista de comandos disponibles.
+        self.commands = {
+            "connect": self.connect_user,
+            "send_message": self.send_message,
+            "send_number": self.send_number,
+            "send_operations": self.send_operation,
+            "reconstruct": self.reconstruct_secret,
+            "status": self.show_status,
+            "exit": self.exit_program
+        }
 
-# # Creamos un polinomio aleatorio de grado 3 en Z7
-# polinomio = Polynomio.random(t=3, p=j)
-# print("Polinomio en Z7:")
-# print(polinomio)
+        # Variable para saber si el sistema está corriendo.
+        self.running = True
 
-# # Evaluamos el polinomio en x=2
-# x = 2
-# resultado = polinomio.eval(x)
-# print(f"El polinomio evaluado en x={x} es {resultado}")
+    def run(self):
+        print("Sistema iniciado. Escribe 'help' para ver los comandos.")
 
+        # Mientras el sistema esté corriendo, se lee la entrada del usuario.
+        while self.running:
+            cmd_input = input(">> ").strip().split()
 
-def menu_encriptar():
-    numero = int(input("Ingresa un número: "))
-    primo = input("Ingresa un número primo (default 43112609): ")
-    if primo == "": primo = 43112609
-    else: primo = int(primo)
+            # Si no se ingresó ningún comando, se ignora.
+            if not cmd_input:
+                continue
+            
+            # Se obtiene el comando y los argumentos.
+            cmd = cmd_input[0]
+            args = cmd_input[1:]
 
-    cantidad_partes = int(input("Ingresa la cantidad de partes en las que se dividirá el número: "))
-    minimo_partes = int(input("Ingresa la cantidad mínima de partes necesarias para recuperar el número: "))
-    if minimo_partes > cantidad_partes:
-        print("La cantidad mínima de partes no puede ser mayor a la cantidad de partes")
-        return
-    
-    numero = Field(numero, primo)
-    
-    secretSharing = ShamirSecretSharing(secret=numero, num_shares=cantidad_partes)
-    shares = secretSharing.generate_shares(t=minimo_partes)
+            # Si el comando es "help", se llama show_help.
+            if cmd == "help":
+                self.show_help()
+            # Si está en la lista de comandos, se ejecuta
+            elif cmd in self.commands:
+                try:
+                    # Se ejecuta el comando con los argumentos.
+                    self.commands[cmd](*args)
+                except Exception as e:
+                    print(f"Error ejecutando '{cmd}': {e}")
+            else:
+                print(f"Comando desconocido: {cmd}")
 
-    print("Shares generados (guardalo muy bien, y enviaselo a los otros pares):")
-    for share in shares:
-        print(share)
+    def connect_user(self, ip, port):
+        # Se conecta al servidor con la dirección y puerto especificados.
+        self.main_user.connect(ip, int(port))
+        print(f"Conectado a {ip}:{port}")
 
-def menu_red():
-    ip = input("Ingresa la IP del servidor (default 127.0.0.1 ): ")
-    if ip == "": ip = "127.0.0.1"
+    def send_message(self, message):
+        # Se envía un mensaje a todos los usuarios conectados.
+        self.main_user.broadcast(message)
+        print(f"Mensaje enviado: {message}")
 
-    puerto = input("Ingresa el puerto del servidor (default random): ")
-    if puerto == "":
-        import random
-        puerto = random.randint(1024, 49151)
-    else: puerto = int(puerto)
+    def send_number(self):
+        # Se envía el número propio a todos los usuarios conectados.
+        self.main_user.send_number()
+        print("Número enviado.")
 
-    secreto = SecretShare(int(input("Ingresa el indice del secreto que tienes: ")), 
-        Field(int(input("Ingresa el secreto que tienes: ")), int(input("Ingresa el primo del secreto: "))))
+    def send_operation(self):
+        # Se envía el resultado de la operación a todos los usuarios conectados.
+        self.main_user.send_operation()
+        print("Operación enviada.")
 
-    print("Conectandose a la red en: ", f"{ip}:{puerto}")
+    def reconstruct_secret(self):
+        # Se reconstruye el secreto con las partes recibidas.
+        secret = self.main_user.reconstruct_secret()
+        print(f"Secreto reconstruido: {secret}")
 
-    usuario = MainUser(secret=secreto, ip=ip, port=puerto)
-    
-    while True:
-        command = input("Ingrese un comando (use help para más información): ")
-        if command == "exit":
-            break
-        elif command.startswith("connect"):
-            try:
-                _, ip, port = command.split()
-                usuario.connect(ip, int(port))
-            except ValueError:
-                print("[-] Formato incorrecto. Uso: connect <IP> <PUERTO>")
-        elif command.startswith("message"):
-            try:
-                _, *message = command.split()
-                usuario.broadcast(" ".join(message))
-            except ValueError:
-                print("[-] Formato incorrecto. Uso: message <MENSAJE>")
-        elif command.startswith("list"):
-            print("Conexiones:")
-            for connection in usuario.party:
-                print(f"{connection.uuid} | {connection.ip}:{connection.port}")
-        elif command.startswith("compartir"):
-            usuario.send_shares()
-        elif command.startswith("recover"):
-            reconstruido = usuario.reconstruct_secret()
-            print(f"El secreto reconstruido es: {reconstruido}")
-        elif command.startswith("shares"):
-            print("Shares:")
-            for share in usuario.shares:
-                print(share)
-        elif command.startswith("help"):
-            print("Comandos disponibles:")
-            print("connect <IP> <PUERTO> - Conectarse a un par")
-            print("message <MENSAJE> - Enviar un mensaje a todos los pares conectados")
-            print("list - Listar las conexiones actuales")
-            print("compartir - Enviar los shares a los otros pares")
-            print("recover - Recuperar el secreto")
-            print("shares - Listar los shares actuales")
-            print("exit - Salir del programa")
-        else:
-            print("Comando no reconocido")
+    def show_status(self):
+        # Se muestra el estado actual del usuario.
+        print(f"Usuarios conectados: ", *list(self.main_user.party.keys()))
+        print(f"Número propio: {self.main_user.numero}")
+        print(f"Partes: ", *self.main_user.partes)
+        print(f"Operaciones: ", *self.main_user.operaciones)
+
+    def exit_program(self):
+        # Detiene el sistema.
+        self.running = False
+        print("Saliendo del sistema.")
+
+    def show_help(self):
+        # Muestra los comandos disponibles.
+        print("Comandos disponibles:")
+        for cmd in self.commands.keys():
+            print(f"  - {cmd}")
+
 
 if __name__ == "__main__":
-    while True:
-        print("¿Que deseas hacer?\n1. Encriptar un número\n2. Conectarse a la red\n3. Salir")
-        opcion = input()
+    ip = input("Ingresa la dirección IP del servidor: \n>> ")
+    port = input("Ingresa el puerto del servidor: \n>> ")
+    numero = input("Ingresa el número a enviar: \n>> ")
 
-        if opcion == "1":
-            menu_encriptar()
-        elif opcion == "2":
-            menu_red()
-        elif opcion == "3":
-            print("Adios")
-            break
-        else:
-            print("Opción inválida")
+    primo = 43112609 # Número primo para el campo. (47 de Mersenne)
+    main_user = MainUser(Field(int(numero), primo), ip, int(port))
+    
+    handler = CommandHandler(main_user)
+    handler.run()

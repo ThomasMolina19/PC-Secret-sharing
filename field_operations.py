@@ -105,6 +105,14 @@ class Field:
         if isinstance(other, Field):
             return self.value == other.value and self.mod == other.mod
         return False
+    
+    def __radd__(self, other):
+        """	
+        Cuando un campo se suma con 0, se devuelve el campo original, ya que 0 es el elemento neutro de la suma.
+        """
+        if other == 0:
+            return self
+        return self.__add__(other)
 
     def inverse(self):
         """
