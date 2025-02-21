@@ -40,6 +40,7 @@ for i in points:
     for x in points:
         poly_val = sum(reshare_polynomials[i][j] * (x ** j) for j in range(n)) % q
         final_shares[x] = (final_shares[x] + poly_val) % q
+print(final_shares)
 
 # Modular inverse function
 def mod_inverse(a, m):
