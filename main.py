@@ -1,5 +1,4 @@
-from field_operations import Field
-from Networking import MainUser
+from NetworkUser import MainUser
 
 # Clase que maneja los comandos por consola.
 class CommandHandler:
@@ -44,25 +43,25 @@ class CommandHandler:
                     # Se ejecuta el comando con los argumentos.
                     self.commands[cmd](*args)
                 except Exception as e:
-                    print(f"Error ejecutando '{cmd}': {e}")
+                    print(f"Error ejecutando '{cmd}':", e)
+                    import traceback
+                    traceback.print_exc()
             else:
                 print(f"Comando desconocido: {cmd}")
 
     def connect_user(self, ip, port):
         # Se conecta al servidor con la dirección y puerto especificados.
         self.main_user.connect(ip, int(port))
-        print(f"Conectado a {ip}:{port}")
 
     def send_message(self, *message):
         # Se envía un mensaje a todos los usuarios conectados.
         # Por como se implementó, el mensaje debe ser una lista de strings.
         # Se envía el mensaje unido por espacios.
         self.main_user.broadcast(" ".join(message))
-        print(f"Mensaje enviado: {message}")
 
-    def send_number(self):
+    def send_number(self, number):
         # Se envía el número propio a todos los usuarios conectados.
-        self.main_user.send_number()
+        self.main_user.send_number(numero=int(number))
         print("Número enviado.")
 
     def send_operation(self):
@@ -77,10 +76,15 @@ class CommandHandler:
 
     def show_status(self):
         # Se muestra el estado actual del usuario.
-        print(f"Usuarios conectados: ", *list(self.main_user.party.keys()))
-        print(f"Número propio: {self.main_user.numero}")
-        print(f"Partes: ", *self.main_user.partes)
-        print(f"Operaciones: ", *self.main_user.operaciones)
+        print(f"Usuarios conectados: ")
+        for user in self.main_user.party.values():
+            print(f"  - {user.uuid} ({user.ip}:{user.port})")
+        print(f"Partes: ")
+        for share in self.main_user.input_shares:
+            print(f"  - {share}")
+        print(f"Productos: ")
+        for share in self.main_user.product_shares:
+            print(f"  - {share}")
 
     def exit_program(self):
         # Detiene el sistema.
@@ -96,11 +100,16 @@ class CommandHandler:
 
 if __name__ == "__main__":
     ip = input("Ingresa la dirección IP del servidor: \n>> ")
-    port = input("Ingresa el puerto del servidor: \n>> ")
-    numero = input("Ingresa el número a enviar: \n>> ")
 
-    primo = 43112609 # Número primo para el campo. (47 de Mersenne)
-    main_user = MainUser(Field(int(numero), primo), ip, int(port))
-    
+    if ip == "":
+        ip = "127.0.0.1"
+
+    port = input("Ingresa el puerto del servidor: \n>> ")
+
+    if port == "":
+        import random
+        port = 5000 + random.randint(1, 1000)
+
+    main_user = MainUser(ip, int(port))
     handler = CommandHandler(main_user)
     handler.run()

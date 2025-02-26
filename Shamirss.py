@@ -67,13 +67,14 @@ class ShamirSecretSharing:
         """
         shares = []
         coeficientes_polinomio = Polynomio.random(t, self.secret)
+        print("Generando polinomio: ", coeficientes_polinomio)
         for i in range(1, self.num_shares + 1):
             shares.append(SecretShare(indice=i, valor=coeficientes_polinomio.eval(Field(i, self.secret.mod))))
         
         return shares
     
     def __str__(self):
-        return f"ShamirSecretSharing(prime={self.prime}, secret={self.secret}, num_shares={self.num_shares})"
+        return f"ShamirSecretSharing(secret={self.secret}, num_shares={self.num_shares})"
     
     @staticmethod
     def recuperar_secreto(shares: list[SecretShare]) -> Field:
@@ -109,3 +110,4 @@ class ShamirSecretSharing:
             secret = secret + yi * li  # Acumulación en módulo primo
 
         return secret
+        
