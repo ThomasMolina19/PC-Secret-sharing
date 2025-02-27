@@ -3,8 +3,12 @@ from NetworkUser import MainUser
 import random
 import time
 
-def create_users(num_users: int, base_port: int = 5500) -> list[MainUser]:
-    users = [MainUser("127.0.0.1", base_port + i, f"user{i+1}") for i in range(num_users)]
+def create_users(num_users: int, mod: int, base_port: int = 5500) -> list[MainUser]:
+    users = []
+    for i in range(num_users):
+        user = MainUser("127.0.0.1", base_port + i, f"user{i+1}")
+        user.mod = mod
+        users.append(user)
     return users
 
 def connect_users(users: list[MainUser]):
@@ -19,7 +23,7 @@ def test_connections(users: list[MainUser]):
     print("Prueba de conexiones exitosa.")
 
 def create_numbers(num_users: int, mod: int) -> list[list[int]]:
-    return [[random.randint(1, mod) for _ in range(random.randint(1, 3))] for _ in range(num_users)]
+    return [[random.randint(1, mod) for _ in range(random.randint(1, 1))] for _ in range(num_users)]
 
 def send_shares(users: list[MainUser], numbers: list[list[int]]):
     for user, num_usuario in zip(users, numbers):
@@ -29,7 +33,7 @@ def send_shares(users: list[MainUser], numbers: list[list[int]]):
 
 def send_operations(users: list[MainUser]):
     for user in users:
-        user.send_operation()
+        user.start_computation()
         time.sleep(2)
 
 def test_reconstruct(users: list[MainUser], real_secret: Field):
@@ -40,9 +44,9 @@ def test_reconstruct(users: list[MainUser], real_secret: Field):
 
 def main():
     num_users = int(input("Ingrese el número de usuarios a crear: "))
-    primo = 43112609
+    primo = 13
     
-    users = create_users(num_users)
+    users = create_users(num_users, primo)
     connect_users(users)
     test_connections(users)
     
@@ -58,7 +62,7 @@ def main():
         real_secret *= num
     
     for i, user in enumerate(users):
-        print(f"\n{user.uuid}\nNúmeros: {', '.join(map(str, numbers[i]))}\nPartes: {', '.join(map(str, user.input_shares))}\nOperaciones: {', '.join(map(str, user.product_shares))}")
+        print(f"\n{user.uuid}\nt: {user.t}\nNúmeros: {', '.join(map(str, numbers[i]))}\nPartes: {', '.join(map(str, user.input_shares))}")
     
     test_reconstruct(users, real_secret)
 

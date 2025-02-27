@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from field_operations import Field
 from socket import socket as Socket
+from Multiplication import SharedVariable, MultiplicationVariable
 
 DELIMITADOR = "||"
 SEPARADOR_IDENTIFICADOR = "="
@@ -39,7 +40,7 @@ class RequestConnectionProtocol(NetworkProtocol):
 
     def receive_message(self, message: str, *args):
         uuid, ip, port = self.parse_message(message)
-        connection = self.user.add_connection(uuid=uuid, ip=ip, port=int(port))
+        connection = self.user.addConnection(uuid=uuid, ip=ip, port=int(port))
 
         if connection is None:
             return
@@ -59,7 +60,7 @@ class AcceptConectionProtocol(NetworkProtocol):
 
     def receive_message(self, message: str, *args):
         uuid, ip, port = self.parse_message(message)
-        self.user.add_connection(uuid=uuid, ip=ip, port=int(port))
+        self.user.addConnection(uuid=uuid, ip=ip, port=int(port))
 
 class MessageProtocol(NetworkProtocol):
     def identifier(self = None):
@@ -73,6 +74,9 @@ class MessageProtocol(NetworkProtocol):
         print(f"[{m[0]}] -> {m[1]}")
 
 class InputShareProtocol(NetworkProtocol):
+    """
+    INPUT_SHARE=user_uuid;value;mod;varUUID
+    """
     def identifier(self = None):
         return "INPUT_SHARE"
     
@@ -81,11 +85,12 @@ class InputShareProtocol(NetworkProtocol):
             Exception("Ingresa un share válido")
             return
 
-        message = self.format_message(self.user.uuid, share.value, share.mod)
+        shareVariable = SharedVariable(share, self.user.uuid)
+        message = self.format_message(self.user.uuid, share.value, share.mod, shareVariable.uuid)
         other.send(message)
 
     def receive_message(self, message: str, *args):
-        uuid, value, mod = self.parse_message(message)
+        uuid, value, mod, varUUID= self.parse_message(message)
         share = Field(int(value), int(mod))
 
         user = self.user.party[uuid]
@@ -94,20 +99,25 @@ class InputShareProtocol(NetworkProtocol):
             self.user.log(f"Usuario desconocido: {uuid}")
             return
         
-        self.user.addInputShare(user, share)
+        shareVariable = SharedVariable(share, uuid, varUUID)
+
+        self.user.addInputShare(user, shareVariable)
 
 class ProductShareProtocol(NetworkProtocol):
+    """
+    PRODUCT_SHARE=user_uuid;value;mod;varUUID;indice
+    """
     def identifier(self = None):
         return "PRODUCT_SHARE"
     
-    def send_message(self, other: Socket, share: Field | None = None, *args) -> None:
-        if share is None:
+    def send_message(self, other: Socket, variable: MultiplicationVariable | None = None, *args) -> None:
+        if variable is None:
             Exception("Ingresa un share válido")
             return
-        other.send(self.format_message(self.user.uuid, share.value, share.mod))
+        other.send(self.format_message(self.user.uuid, variable.value.value, variable.value.mod, variable.uuid, variable.indice))
 
     def receive_message(self, message: str, *args):
-        uuid, value, mod = self.parse_message(message)
+        uuid, value, mod, varUUID, indice = self.parse_message(message)
         share = Field(int(value), int(mod))
 
         user = self.user.party[uuid]
@@ -116,4 +126,5 @@ class ProductShareProtocol(NetworkProtocol):
             self.user.log(f"Usuario desconocido: {uuid}")
             return
         
-        self.user.addProductShare(user, share)
+        shareVariable = MultiplicationVariable(share, uuid, int(indice))
+        self.user.processProductShare(user, shareVariable)
