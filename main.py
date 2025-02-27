@@ -1,9 +1,9 @@
-from NetworkUser import MainUser
+import NetworkUser
 
 # Clase que maneja los comandos por consola.
 class CommandHandler:
-    def __init__(self, main_user: MainUser):
-        self.main_user: MainUser = main_user
+    def __init__(self, main_user: NetworkUser.MainUser):
+        self.main_user: NetworkUser.MainUser = main_user
 
         # Lista de comandos disponibles.
         self.commands = {
@@ -66,7 +66,7 @@ class CommandHandler:
 
     def send_operation(self):
         # Se envía el resultado de la operación a todos los usuarios conectados.
-        self.main_user.send_operation()
+        self.main_user.sendGate()
         print("Operación enviada.")
 
     def reconstruct_secret(self):
@@ -81,9 +81,6 @@ class CommandHandler:
             print(f"  - {user.uuid} ({user.ip}:{user.port})")
         print(f"Partes: ")
         for share in self.main_user.input_shares:
-            print(f"  - {share}")
-        print(f"Productos: ")
-        for share in self.main_user.product_shares:
             print(f"  - {share}")
 
     def exit_program(self):
@@ -110,6 +107,6 @@ if __name__ == "__main__":
         import random
         port = 5000 + random.randint(1, 1000)
 
-    main_user = MainUser(ip, int(port))
+    main_user = NetworkUser.MainUser(ip, int(port))
     handler = CommandHandler(main_user)
     handler.run()

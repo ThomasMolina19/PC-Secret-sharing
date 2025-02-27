@@ -1,14 +1,16 @@
 from abc import ABC, abstractmethod
 from field_operations import Field
 from socket import socket as Socket
-from Multiplication import SharedVariable, MultiplicationVariable
+
+import NetworkUser
+import Protocol
 
 DELIMITADOR = "||"
 SEPARADOR_IDENTIFICADOR = "="
 SEPARADOR_ARGUMENTOS = ";"
 
 class NetworkProtocol(ABC):
-    def __init__(self, user):
+    def __init__(self, user: "NetworkUser.MainUser"):
         self.user = user
 
     @abstractmethod
@@ -73,58 +75,58 @@ class MessageProtocol(NetworkProtocol):
         m = self.parse_message(message)
         print(f"[{m[0]}] -> {m[1]}")
 
-class InputShareProtocol(NetworkProtocol):
+class ShareProtocol(NetworkProtocol, ABC):
+    def send_message(self, other: Socket, share: Protocol.SharedVariable | None = None, *args) -> None:
+        if share is None:
+            raise Exception("Ingresa un share válido")
+
+        message = self.format_message(self.user.uuid, share.value.value, share.value.mod, share.index, share.uuid, *args)
+        other.send(message)
+
+    def receive_message(self, message: str, *args):
+        uuid, value, mod, index, varUUID, *other = self.parse_message(message)
+        share = Field(int(value), int(mod))
+
+        user = self.user.party.get(uuid)
+        if user is None:
+            self.user.log(f"Usuario desconocido: {uuid}")
+            return
+        
+        shareVariable = Protocol.SharedVariable(share, int(index), varUUID)
+        self.messageFunction(user, shareVariable, *other)
+
+    @abstractmethod
+    def messageFunction(self, user: "NetworkUser.NetworkUser", share: Protocol.SharedVariable, *args) -> None:
+        pass
+        
+
+class InputShareProtocol(ShareProtocol):
     """
-    INPUT_SHARE=user_uuid;value;mod;varUUID
+    INPUT_SHARE=user_uuid;value;mod;index;varUUID
     """
     def identifier(self = None):
         return "INPUT_SHARE"
     
-    def send_message(self, other: Socket, share: Field | None = None, *args) -> None:
-        if share is None:
-            Exception("Ingresa un share válido")
-            return
+    def messageFunction(self, user: "NetworkUser.NetworkUser", share: Protocol.SharedVariable, *_) -> None:
+        self.user.onReceiveInputShare(user, share)
 
-        shareVariable = SharedVariable(share, self.user.uuid)
-        message = self.format_message(self.user.uuid, share.value, share.mod, shareVariable.uuid)
-        other.send(message)
-
-    def receive_message(self, message: str, *args):
-        uuid, value, mod, varUUID= self.parse_message(message)
-        share = Field(int(value), int(mod))
-
-        user = self.user.party[uuid]
-
-        if user is None:
-            self.user.log(f"Usuario desconocido: {uuid}")
-            return
-        
-        shareVariable = SharedVariable(share, uuid, varUUID)
-
-        self.user.addInputShare(user, shareVariable)
-
-class ProductShareProtocol(NetworkProtocol):
+class ProductShareProtocol(ShareProtocol):
     """
-    PRODUCT_SHARE=user_uuid;value;mod;varUUID;indice
+    PRODUCT_SHARE=user_uuid;value;mod;index;varUUID;operation_index
     """
     def identifier(self = None):
         return "PRODUCT_SHARE"
     
-    def send_message(self, other: Socket, variable: MultiplicationVariable | None = None, *args) -> None:
-        if variable is None:
-            Exception("Ingresa un share válido")
-            return
-        other.send(self.format_message(self.user.uuid, variable.value.value, variable.value.mod, variable.uuid, variable.indice))
+    def messageFunction(self, user: "NetworkUser.NetworkUser", share: Protocol.SharedVariable, *args) -> None:
+        self.user.log(f"args: {args}")
+        self.user.onReceiveProductShare(user, share, int(args[0]))
 
-    def receive_message(self, message: str, *args):
-        uuid, value, mod, varUUID, indice = self.parse_message(message)
-        share = Field(int(value), int(mod))
-
-        user = self.user.party[uuid]
-
-        if user is None:
-            self.user.log(f"Usuario desconocido: {uuid}")
-            return
-        
-        shareVariable = MultiplicationVariable(share, uuid, int(indice))
-        self.user.processProductShare(user, shareVariable)
+class FinalShareProtocol(ShareProtocol):
+    """
+    FINAL_SHARE=user_uuid;value;mod;index;varUUID
+    """
+    def identifier(self = None):
+        return "FINAL_SHARE"
+    
+    def messageFunction(self, user: "NetworkUser.NetworkUser", share: Protocol.SharedVariable, *_) -> None:
+        self.user.onReceiveFinalShare(user, share)

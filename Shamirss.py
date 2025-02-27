@@ -1,27 +1,8 @@
 from Polynomials import Polynomio
+import Protocol
 from field_operations import Field
 
-class SecretShare:
-    """
-    Representa una parte de un secreto en el esquema de Shamir.
-
-    Atributos:
-    -----------
-    indice : int
-        Índice de la parte del secreto.
-    valor : Field
-        Valor de la parte del secreto en el campo finito.
-    """
-    def __init__(self, indice: int, valor: Field):
-        self.indice = indice
-        self.valor = valor
-
-    def __str__(self):
-        return f"({self.indice}, {self.valor})"
-    
-    def __eq__(self, value):
-        return self.indice == value.indice and self.valor == value.valor
-
+import Lagrange
 
 class ShamirSecretSharing:
     """
@@ -51,7 +32,7 @@ class ShamirSecretSharing:
         self.secret = secret
         self.num_shares = num_shares
 
-    def generate_shares(self, t: int) -> list[SecretShare]:
+    def generate_shares(self, t: int) -> list["Protocol.SharedVariable"]:
         """
         Genera las partes del secreto utilizando un polinomio aleatorio de grado t-1.
         
@@ -67,9 +48,8 @@ class ShamirSecretSharing:
         """
         shares = []
         coeficientes_polinomio = Polynomio.random(t, self.secret)
-        print("Generando polinomio: ", coeficientes_polinomio)
         for i in range(1, self.num_shares + 1):
-            shares.append(SecretShare(indice=i, valor=coeficientes_polinomio.eval(Field(i, self.secret.mod))))
+            shares.append(Protocol.SharedVariable(value=coeficientes_polinomio.eval(Field(i, self.secret.mod)), index=i))
         
         return shares
     
@@ -77,7 +57,7 @@ class ShamirSecretSharing:
         return f"ShamirSecretSharing(secret={self.secret}, num_shares={self.num_shares})"
     
     @staticmethod
-    def recuperar_secreto(shares: list[SecretShare]) -> Field:
+    def recuperar_secreto(shares: list["Protocol.SharedVariable"]) -> Field:
         """
         Recupera el secreto mediante interpolación de Lagrange en un campo finito.
         
@@ -91,23 +71,6 @@ class ShamirSecretSharing:
         Field
             Secreto recuperado (f(0) mod primo).
         """
+        return Lagrange.lagrange_interpolation(shares, required_x=0)
 
-        primo = shares[0].valor.mod
-        secret = Field(0, primo)
-
-        for i in range(len(shares)):
-            xi, yi = shares[i].indice, shares[i].valor
-            li = Field(1, primo)
-
-            for j in range(len(shares)):
-                if i == j:
-                    continue
-                xj = shares[j].indice
-                numerador = Field(0 - xj, primo)  # (x - xj), con x=0
-                denominador = Field(xi - xj, primo)  # (xi - xj)
-                li = li * numerador * denominador.inverse()
-
-            secret = secret + yi * li  # Acumulación en módulo primo
-
-        return secret
         
