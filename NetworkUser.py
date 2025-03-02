@@ -38,13 +38,13 @@ class NetworkUser:
         return False
 
 class MainUser:
-    def __init__(self, ip: str, port: int, uuid: str = ""):        
+    def __init__(self, ip: str, port: int, uuid: str | None = None):        
         self.ip: str = ip
         self.port: int = port
 
         self.mod = 43112609
 
-        self.uuid: str = uuid if uuid != "" else str(UUID.uuid4())
+        self.uuid: str = uuid if uuid else str(UUID.uuid4())
 
         self.party: dict[str, NetworkUser] = {}
 
