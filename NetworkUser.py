@@ -11,6 +11,8 @@ import Protocol
 from NetworkProtocol import ShareProtocol, RequestConnectionProtocol, AcceptConectionProtocol, MessageProtocol, InputShareProtocol, FinalShareProtocol, ProductShareProtocol, NetworkProtocol, DELIMITADOR, SEPARADOR_IDENTIFICADOR
 import Shamirss
 
+import time
+
 DEFAULT_PROTOCOLS: list[type[NetworkProtocol]] = [
     RequestConnectionProtocol,
     AcceptConectionProtocol,
@@ -113,19 +115,34 @@ class MainUser:
             protocol = MessageProtocol(self)
             protocol.send_message(user.host, message)
 
-    def connect(self, ip: str, port: int):
+    def connect(self, ip: str, port: int, retries: int = 3, delay: int = 5) -> Socket | None:
         secure_connection = None
-        try:
-            connection = Socket(AF_INET, SOCK_STREAM)
-
-            secure_connection = self.client_context.wrap_socket(connection, server_hostname=HOSTNAME)
-            secure_connection.connect((ip, port))
+        attempt = 0
+        
+        while attempt < retries:
+            try:
+                connection = Socket(AF_INET, SOCK_STREAM)
+                secure_connection = self.client_context.wrap_socket(connection, server_hostname=HOSTNAME)
+                secure_connection.connect((ip, port))
+                
+                protocol = RequestConnectionProtocol(self)
+                protocol.send_message(secure_connection)
+                
+                self.log(f"Enviando solicitud de conexión a {ip}:{port}")
+                return secure_connection  # Return on successful connection
             
-            protocol = RequestConnectionProtocol(self)
-            protocol.send_message(secure_connection)
-            self.log(f"Enviando solicitud de conexión a {ip}:{port}")
-        except Exception as e:
-            self.log(f"No se pudo conectar a {ip}:{port}:{str(e)}")
+            except Exception as e:
+                if e.args[0] == 10061:
+                    self.log(f"No se pudo conectar a {ip}:{port} (Intento {attempt + 1}/{retries}): {str(e)}")
+                    attempt += 1
+                    if attempt < retries:
+                        time.sleep(delay)  # Wait before retrying
+                    else:
+                        self.log("Se agotaron los intentos de reconexión.")
+                        break
+                else:
+                    self.log(f"Error inesperado al conectar a {ip}:{port}: {str(e)}")
+                    break
 
     def addConnection(self, ip: str, port: int, uuid: str) -> NetworkUser | None:
         if uuid in self.party:

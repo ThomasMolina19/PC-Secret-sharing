@@ -95,18 +95,39 @@ class CommandHandler:
             print(f"  - {cmd}")
 
 
+def handle_console(ip: str | None, port: int | None):
+        if not ip:
+            ip = input("Ingresa la dirección IP del servidor: \n>> ")
+        if not port:
+            port = int(input("Ingresa el puerto del servidor: \n>> "))
+
+        if not ip or not port:
+            print("Debes ingresar una dirección IP y un puerto.")
+            return
+        
+        main_user = NetworkUser.MainUser(ip, port)
+        handler = CommandHandler(main_user)
+        handler.run()
+
+def handle_file(file_path: str):
+    import FileManager
+
+    cf = FileManager.ConnectionsFile(file_path)
+    host = cf.create_host()
+    cf.connect_with_users(host)
+    print("Conexiones establecidas.")
+        
+
 if __name__ == "__main__":
-    ip = input("Ingresa la dirección IP del servidor: \n>> ")
+    import argparse
 
-    if ip == "":
-        ip = "127.0.0.1"
+    parser = argparse.ArgumentParser(description="Sistema de comunicación segura.")
+    parser.add_argument("--ip", help="Dirección IP del servidor.", type=str, required=False)
+    parser.add_argument("--port", help="Puerto del servidor.", type=int, required=False)
+    parser.add_argument("--file", help="Archivo de conexiones.", type=str, required=False)
+    args = parser.parse_args()
 
-    port = input("Ingresa el puerto del servidor: \n>> ")
-
-    if port == "":
-        import random
-        port = 5000 + random.randint(1, 1000)
-
-    main_user = NetworkUser.MainUser(ip, int(port))
-    handler = CommandHandler(main_user)
-    handler.run()
+    if args.file is not None:
+        handle_file(file_path=args.file)
+    else:
+        handle_console(args.ip, args.port)
