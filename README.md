@@ -9,12 +9,21 @@ Además, se simula una red P2P para modelar la comunicación entre las partes, p
 El software desarrollado incluirá pruebas de concepto y mediciones de tiempo de cómputo y uso de la red, lo que permitirá evaluar la eficiencia y escalabilidad del protocolo.
 
 # Funcionamiento del programa
-Creación de Usuarios y Conexión
+**Creación de Usuarios y Conexión**
 - Se crean múltiples usuarios que se conectan entre sí en una red P2P simulada.
 - Cada usuario tiene un identificador único y comparte su dirección IP y puerto con los demás.
 
-Generación de Acciones (Shares)
+**Generación de Acciones (Shares)**
 - Cada usuario genera un secreto (un número en el campo primo Zp).
 - Utiliza el esquema de Shamir para generar acciones (shares) del secreto.
 - Las acciones se distribuyen entre los demás usuarios.
+
+**Reconstrucción del Secreto**
+- Los usuarios utilizan la interpolación de Lagrange para reconstruir el secreto a partir de las acciones recibidas.
+- El secreto se reconstruye evaluando el polinomio interpolado en x=0.
+
+**Operaciones en la Red**
+- Los usuarios se comunican mediante protocolos de red.
+- Cada protocolo maneja un tipo específico de mensaje (solicitud de conexión, envío de acciones, etc.).
+  
 # Estructura del codigo
