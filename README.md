@@ -7,3 +7,7 @@ Las operaciones se realizan en un campo primo finito Zp, utilizando primos de Me
 Además, se simula una red P2P para modelar la comunicación entre las partes, permitiendo la transmisión segura de las acciones. 
 
 El software desarrollado incluirá pruebas de concepto y mediciones de tiempo de cómputo y uso de la red, lo que permitirá evaluar la eficiencia y escalabilidad del protocolo.
+
+# Funcionamiento del programa
+
+# Estructura del codigo
