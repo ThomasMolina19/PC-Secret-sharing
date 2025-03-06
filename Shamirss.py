@@ -43,7 +43,7 @@ class ShamirSecretSharing:
             coeficientes_polinomio = Polynomio.random(t, self.secret, self.prime)
             for i in range(1, self.num_shares + 1):
                 s_i.append(coeficientes_polinomio.eval(i))
-            print(coeficientes_polinomio)
+            # print(coeficientes_polinomio)
             for i in range(0, self.num_shares):
                 s_i[i]=Field(int(s_i[i]), self.prime).value
             return s_i

@@ -7,7 +7,7 @@ class Party:
         self.field = field
         self.number_players = number_players
 
-    def generate_party(self):
+    def generate_party(self,t):
         n = self.number_players
 
         party_shares = {}
@@ -23,9 +23,8 @@ class Party:
                     print("Ingrese un número válido.")
 
             shamir = ShamirSecretSharing(self.field, secret, n)
-            shares = shamir.generate_shares(n-1)
-            print(shares)
-            
+            shares = shamir.generate_shares(t)
+            # print(shares)
             party_shares[f"p_{i}"] = shares
         return party_shares
 
@@ -38,5 +37,3 @@ class Party:
             for j, key in enumerate(party_shares.keys()):
                 mixed_shares[f"p_{i + 1}"].append(party_shares[key][i])
         return mixed_shares
-        
-
