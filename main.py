@@ -1,4 +1,4 @@
-from Protocolo import secure_multiplication_reorganized
+from BiMultiplication import secure_multiplication_reorganized
 from Party import Party
 from Lagrange import lagrange_interpolation
 
