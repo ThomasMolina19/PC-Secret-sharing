@@ -101,8 +101,7 @@ def handle_console(ip: str | None, port: int | None):
         if not ip:
             ip = input("Ingresa la dirección IP del servidor: \n>> ")
             if not ip or ip == "":
-                import socket
-                ip = socket.gethostbyname(socket.gethostname())
+                ip = get_local_ip()
         if not port:
             p = input("Ingresa el puerto del servidor: \n>> ")
             if p and p != "":
@@ -125,7 +124,21 @@ def handle_file(file_path: str):
     host = cf.create_host()
     cf.connect_with_users(host)
     print("Conexiones establecidas.")
-        
+
+
+def get_local_ip():
+        try:
+            import socket
+            # Crear un socket temporal y conectarse a un servidor externo (Google DNS)
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.connect(("8.8.8.8", 80))  # No envía datos, solo obtiene la IP local
+            local_ip = s.getsockname()[0]
+            s.close()
+            return local_ip
+        except Exception as e:
+            print(f"Error obteniendo la IP local: {e}")
+            return "127.0.0.1"  # Fallback a localhost
+
 
 if __name__ == "__main__":
     import argparse
