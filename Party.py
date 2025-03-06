@@ -37,3 +37,5 @@ class Party:
             for j, key in enumerate(party_shares.keys()):
                 mixed_shares[f"p_{i + 1}"].append(party_shares[key][i])
         return mixed_shares
+
+

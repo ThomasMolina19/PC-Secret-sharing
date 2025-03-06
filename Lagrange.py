@@ -4,7 +4,7 @@ from Shamirss import ShamirSecretSharing
 def lagrange_interpolation(shares, prime):
     secret = Field(0, prime)
     num_shares = len(shares)
-    
+
     #Se comienza la sumatoria
     for j in range(num_shares):
         xj, yj = shares[j]
@@ -22,4 +22,3 @@ def lagrange_interpolation(shares, prime):
         lj = numerator * denominator.inverse()
         secret += Field(yj, prime) * lj
     return secret
-
