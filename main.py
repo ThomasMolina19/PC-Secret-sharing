@@ -96,10 +96,19 @@ class CommandHandler:
 
 
 def handle_console(ip: str | None, port: int | None):
+        import random
+
         if not ip:
             ip = input("Ingresa la dirección IP del servidor: \n>> ")
+            if not ip or ip == "":
+                import socket
+                ip = socket.gethostbyname(socket.gethostname())
         if not port:
-            port = int(input("Ingresa el puerto del servidor: \n>> "))
+            p = input("Ingresa el puerto del servidor: \n>> ")
+            if p and p != "":
+                port = int(p)
+            else:
+                port = 5500 + random.randint(1, 999)
 
         if not ip or not port:
             print("Debes ingresar una dirección IP y un puerto.")
