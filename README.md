@@ -18,7 +18,7 @@ Además, se simula una red P2P para modelar la comunicación entre las partes, p
 - Las acciones se distribuyen entre los demás usuarios.
 
 **Reconstrucción del Secreto**
-- Los usuarios utilizan la interpolación de Lagrange para reconstruir el secreto a partir de las acciones recibidas.
+- Utilizando la interpolación de Lagrange para reconstruir el secreto a partir de las acciones recibidas.
 - El secreto se reconstruye evaluando el polinomio interpolado en x=0.
 
 **Operaciones en la Red**
