@@ -188,7 +188,7 @@ El archivo json es de la siguiente forma
                     "ip": "ip del usuario",
                     "port": "puerto del usuario",
                     "uuid": "uuid del usuario",
-                    "numbers": [ "número 1", "número 2", ... ]
+                    "numbers": [ "número 1" ]
                 }
             ]
         }
