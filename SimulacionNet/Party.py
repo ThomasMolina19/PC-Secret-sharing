@@ -40,7 +40,7 @@
 from field_operations import Field
 
 class Party:
-    def __init__(self, player_id: int, values=None, field_modulus=11):
+    def __init__(self, player_id: int, values=None, field_modulus=2**19):
         """
         Initialize a Party with a player ID and optionally a list of values.
         
@@ -53,7 +53,7 @@ class Party:
         
         # If values are provided, convert them to Field objects
         if values is not None:
-            self.shares = [Field(value, field_modulus) for value in values]
+            self.shares = [Field(value, field_modulus).value for value in values]
         else:
             self.shares = []
             
@@ -84,4 +84,5 @@ class Party:
 # Example usage with the improved design
 p1 = Party(1, [2, 3, 4, 5])
 p2 = Party(2, [2, 75, 35, 2])
-print(Party.send([p1, p2]))
+p3 = Party(3, [15,68,98,45])
+print(Party.send([p1, p2, p3]))
