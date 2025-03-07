@@ -5,7 +5,8 @@ Este proyecto tiene como objetivo implementar un protocolo de comunicación segu
 Las operaciones se realizan en un campo primo finito Zp, utilizando primos de Mersenne para optimizar la eficiencia de las operaciones modulares. El protocolo se basa en el esquema de Shamir Secret Sharing, donde cada parte genera y distribuye acciones (shares) de su dato privado, y posteriormente se reconstruye el secreto (el producto final) mediante interpolación de Lagrange.
 
 Además, se simula una red P2P para modelar la comunicación entre las partes, permitiendo la transmisión segura de las acciones. 
-Estructura del código
+
+# Estructura del código
 El código está organizado en varios módulos y clases que trabajan juntos para implementar el protocolo de compartición de secretos y la multiplicación segura. Aquí hay una descripción de los componentes principales:
 
 **Field:**
