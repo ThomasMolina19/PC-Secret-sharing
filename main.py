@@ -148,10 +148,7 @@ def handle_file(file_path: str, ip: str | None = None, port: int | None = None, 
     import time
 
     cf = FileManager.ConnectionsFile(file_path)
-    if ip is not None and port is not None:
-        host = NetworkUser.MainUser(ip, port, uuid)
-    else:
-        host = cf.create_host()
+    host = cf.create_host(ip, port, uuid)
 
     host.status()
 

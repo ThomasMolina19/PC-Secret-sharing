@@ -53,15 +53,21 @@ class ConnectionsFile:
             print(f"Error al leer el archivo JSON: {e}")
             return None
         
-    def create_host(self) -> NetworkUser.MainUser:
+    def create_host(self, ip: str | None, port: int | None, uuid: str | None) -> NetworkUser.MainUser:
         """
         Crea el objeto del host con la información del archivo de conexiones.
         """
-        host_ip, host_port, uuid = self.host.get("ip"), self.host.get("port"), self.host.get("uuid")
-        if host_ip is None or host_port is None:
-            raise Exception("No se ha definido el host.")
+        if ip is None :
+            ip = self.host.get("ip")
+        if port is None:
+            port = int(self.host.get("port"))
+        if uuid is None:
+            uuid = self.host.get("uuid")
         
-        host = NetworkUser.MainUser(host_ip, host_port, uuid)
+        if ip is None or port is None:
+            raise Exception("Faltan datos para crear el host.")
+
+        host = NetworkUser.MainUser(ip, port, uuid)
         return host
     
     def connect_with_users(self, host: NetworkUser.MainUser):
