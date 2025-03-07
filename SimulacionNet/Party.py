@@ -1,55 +1,22 @@
 from field_operations import Field
-from Shamirss import ShamirSecretSharing
+
 
 class Party:
-    def __init__(self, field: int, number_players: int):
-        self.field = field
-        self.number_players = number_players
+    def __init__(self, player_id: int, shares: list[Field]):
+        self.player_id = player_id
+        self.shares = shares
 
-    def generate_party(self, valores: list[int]):
-        n = self.number_players
-        secrets = valores
-        t = (n) // 2
-
-        party_shares = {}
-        
-
-        for i in range(1, n + 1):
-            while True:
-                try:
-                    secret = secrets[i - 1]
-                    secrets.append(Field(secret, self.field).value)
-                    break
-                except:
-                    print("Ingrese un número válido.")
-
-            shamir = ShamirSecretSharing(self.field, secret, n)
-            shares = shamir.generate_shares(t)
-
-            
-            print(f"Shares generados por el jugador {i}:")
-            print(f"{shares}\n")
-            
-            party_shares[f"p_{i}"] = shares
-        
-        mixed_shares = self.send(party_shares)
-        print("Fragmentos originlaes de los jugadores:")
-        print(party_shares)
-        
-        return mixed_shares
+    def __repr__(self):
+        return f"Party {self.player_id} con shares: {self.shares}"
 
     @staticmethod
-    def send(party_shares):
-        mixed_shares = {key: [] for key in party_shares.keys()}
-        n = len(party_shares)
-
+    def send(players: list['Party']):
+        # Se crea un diccionario para almacenar los fragmentos mezclados
+        n = len(players)
+        mixed_shares = {f"p_{i+1}": [] for i in range(n)}
+        
+        # Se reordena la información: cada jugador recibirá el i-ésimo fragmento
         for i in range(n):
-            for j, key in enumerate(party_shares.keys()):
-                mixed_shares[f"p_{i + 1}"].append(party_shares[key][i])
+            for player in players:
+                mixed_shares[f"p_{i+1}"].append(player.shares[i])
         return mixed_shares
-    
-
-
-
-
-
