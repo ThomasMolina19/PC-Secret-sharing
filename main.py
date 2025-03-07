@@ -163,12 +163,22 @@ def handle_file(file_path: str, ip: str | None = None, port: int | None = None, 
 
     print("Enviando shares...")
     cf.send_shares(host)
+
+    while len(host.input_shares) < len(host.party):
+        print("Esperando shares...")
+        time.sleep(1)
+
     print("Shares enviados.")
 
     host.status()
 
     print("Enviando operaciones...")
     cf.send_operations(host)
+
+    while len(host.getMultiplicationShare(0)) < len(host.party):
+        print("Esperando multiplicaciones...")
+        time.sleep(1)
+
     print("Operaciones enviadas.")
 
     host.status()
