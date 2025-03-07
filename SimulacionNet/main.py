@@ -50,8 +50,6 @@ def main():
 
     # Ejecutar el protocolo con los valores leídos
     mixed_shares = protocol.run_protocol(valores)
-
-    print("\nFragmentos después de la repartición:")
     print(mixed_shares)
 
 
