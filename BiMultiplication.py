@@ -2,7 +2,7 @@ from field_operations import Field
 from Polynomials import Polynomio
 from Shamirss import ShamirSecretSharing
 from Lagrange import lagrange_interpolation
-from Party import Party
+from party0 import Party
 
 def secure_multiplication_reorganized(party_values, prime, num_parties, degree):
     """

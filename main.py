@@ -1,5 +1,5 @@
 from BiMultiplication import secure_multiplication_reorganized
-from Party import Party
+from party0 import Party
 from Lagrange import lagrange_interpolation
 import argparse
 
