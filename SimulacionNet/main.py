@@ -1,5 +1,6 @@
 import argparse
 from Party import Party
+from MultiPartyProtocol import Protocol
 
 
 def leer_archivo(input_file):
@@ -40,16 +41,17 @@ def main():
     if args.numero is not None:
         p = args.numero
         print(f"\nEl campo a trabajar es Z_{p}\n")
+    else:
+        print("\nNo se proporcionó un número. Usaremos un valor predeterminado de campo.")
+        p = 7  # Valor predeterminado del campo primo (si no se pasa como argumento)
 
-    number_players = len(valores)
-   
-    # Crear una instancia de la clase Party
-    party = Party(p,number_players)
-    a=party.generate_party(valores)
-    print("\nFragmentos despues de la reparticion:")
-    print(a)
+    # Crear una instancia de la clase Protocol
+    protocol = Protocol(p, len(valores))
 
-    
+    # Ejecutar el protocolo con los valores leídos
+    mixed_shares = protocol.run_protocol(valores)
+    print(mixed_shares)
+
 
 if __name__ == "__main__":
     main()
