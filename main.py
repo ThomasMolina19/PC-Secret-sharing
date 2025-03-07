@@ -8,9 +8,9 @@ class CommandHandler:
         # Lista de comandos disponibles.
         self.commands = {
             "connect": self.connect_user,
-            "send_message": self.send_message,
-            "send_number": self.send_number,
-            "send_operations": self.send_operation,
+            "message": self.send_message,
+            "number": self.send_number,
+            "multiply": self.send_operation,
             "reconstruct": self.reconstruct_secret,
             "status": self.show_status,
             "exit": self.exit_program
@@ -66,7 +66,7 @@ class CommandHandler:
 
     def send_operation(self):
         # Se envía el resultado de la operación a todos los usuarios conectados.
-        self.main_user.sendGate()
+        self.main_user.sendOperation()
         print("Operación enviada.")
 
     def reconstruct_secret(self):
@@ -76,12 +76,7 @@ class CommandHandler:
 
     def show_status(self):
         # Se muestra el estado actual del usuario.
-        print(f"Usuarios conectados: ")
-        for user in self.main_user.party.values():
-            print(f"  - {user.uuid} ({user.ip}:{user.port})")
-        print(f"Partes: ")
-        for share in self.main_user.input_shares:
-            print(f"  - {share}")
+        self.main_user.status()
 
     def exit_program(self):
         # Detiene el sistema.
@@ -95,7 +90,7 @@ class CommandHandler:
             print(f"  - {cmd}")
 
 
-def handle_console(ip: str | None, port: int | None):
+def handle_console(ip: str | None, port: int | None, uuid: str | None = None):
         import random
 
         if not ip:
@@ -113,17 +108,52 @@ def handle_console(ip: str | None, port: int | None):
             print("Debes ingresar una dirección IP y un puerto.")
             return
         
-        main_user = NetworkUser.MainUser(ip, port)
+        main_user = NetworkUser.MainUser(ip, port, uuid)
         handler = CommandHandler(main_user)
         handler.run()
 
-def handle_file(file_path: str):
+def handle_file(file_path: str, ip: str | None = None, port: int | None = None, uuid: str | None = None):
     import FileManager
+    import time
 
     cf = FileManager.ConnectionsFile(file_path)
-    host = cf.create_host()
+    if ip is not None and port is not None:
+        host = NetworkUser.MainUser(ip, port, uuid)
+    else:
+        host = cf.create_host()
+
+    host.status()
+
+    print("Conectando con usuarios...")
     cf.connect_with_users(host)
     print("Conexiones establecidas.")
+
+    host.status()
+
+    print("Enviando shares...")
+    cf.send_shares(host)
+    print("Shares enviados.")
+
+    host.status()
+
+    print("Enviando operaciones...")
+    cf.send_operations(host)
+    print("Operaciones enviadas.")
+
+    host.status()
+
+    time.sleep(15)
+
+    host.status()
+
+    print("Reconstruyendo secreto...")
+    secret = cf.reconstruct(host)
+    print(f"Secreto reconstruido: {secret}")
+
+    real_secret = cf.real_secret()
+    print(f"Secreto esperado: {real_secret}")
+
+    input("Presiona Enter para continuar...")
 
 
 def get_local_ip():
@@ -146,10 +176,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Sistema de comunicación segura.")
     parser.add_argument("--ip", help="Dirección IP del servidor.", type=str, required=False)
     parser.add_argument("--port", help="Puerto del servidor.", type=int, required=False)
+    parser.add_argument("--uuid", help="UUID del usuario.", type=str, required=False)
     parser.add_argument("--file", help="Archivo de conexiones.", type=str, required=False)
     args = parser.parse_args()
 
     if args.file is not None:
-        handle_file(file_path=args.file)
+        handle_file(file_path=args.file, ip=args.ip, port=args.port, uuid=args.uuid)
     else:
-        handle_console(args.ip, args.port)
+        handle_console(args.ip, args.port, args.uuid)

@@ -6,13 +6,13 @@ def lagrange_interpolation(shares: list["Protocol.SharedVariable"], required_x =
         secret = Field(0, primo)
 
         for i in range(len(shares)):
-            xi, yi = shares[i].index, shares[i].value
+            xi, yi = i + 1, shares[i].value
             li = Field(1, primo)
 
             for j in range(len(shares)):
                 if i == j:
                     continue
-                xj = shares[j].index
+                xj = j + 1
                 numerador = Field(required_x - xj, primo)  # (x - xj)
                 denominador = Field(xi - xj, primo)  # (xi - xj)
                 li = li * numerador * denominador.inverse()

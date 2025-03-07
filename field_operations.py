@@ -130,7 +130,7 @@ class Field:
         Returns:
         str: Representación en cadena de la instancia de Field.
         """
-        return str(self.value) + " (mod " + str(self.mod) + ")"
+        return str(self.value)
 
     @staticmethod
     def random(mod: int):

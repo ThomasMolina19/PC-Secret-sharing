@@ -32,7 +32,7 @@ class ShamirSecretSharing:
         self.secret = secret
         self.num_shares = num_shares
 
-    def generate_shares(self, t: int) -> list["Protocol.SharedVariable"]:
+    def generate_shares(self, t: int) -> list[Field]:
         """
         Genera las partes del secreto utilizando un polinomio aleatorio de grado t-1.
         
@@ -49,7 +49,7 @@ class ShamirSecretSharing:
         shares = []
         coeficientes_polinomio = Polynomio.random(t, self.secret)
         for i in range(1, self.num_shares + 1):
-            shares.append(Protocol.SharedVariable(value=coeficientes_polinomio.eval(Field(i, self.secret.mod)), index=i))
+            shares.append(coeficientes_polinomio.eval(Field(i, self.secret.mod)))
         
         return shares
     
@@ -71,6 +71,7 @@ class ShamirSecretSharing:
         Field
             Secreto recuperado (f(0) mod primo).
         """
-        return Lagrange.lagrange_interpolation(shares, required_x=0)
+        ordered_shares = sorted(shares, key=lambda x: x.sender)
+        return Lagrange.lagrange_interpolation(ordered_shares, required_x=0)
 
         

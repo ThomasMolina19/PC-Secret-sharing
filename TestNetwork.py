@@ -3,7 +3,7 @@ import NetworkUser
 import random
 import time
 
-WAIT_TIME = 2
+WAIT_TIME = 2.5
 
 def create_users(num_users: int, mod: int, base_port: int = 5500) -> list[NetworkUser.MainUser]:
     users = []
@@ -25,7 +25,7 @@ def test_connections(users: list[NetworkUser.MainUser]):
     print("Prueba de conexiones exitosa.")
 
 def create_numbers(num_users: int, mod: int) -> list[list[int]]:
-    return [[random.randint(1, mod) for _ in range(random.randint(1, 1))] for _ in range(num_users)]
+    return [[random.randint(1, mod) for _ in range(1)] for _ in range(num_users)]
 
 def send_shares(users: list[NetworkUser.MainUser], numbers: list[list[int]]):
     for user, num_usuario in zip(users, numbers):
@@ -35,7 +35,7 @@ def send_shares(users: list[NetworkUser.MainUser], numbers: list[list[int]]):
 
 def send_operations(users: list[NetworkUser.MainUser]):
     for user in users:
-        user.sendGate()
+        user.sendOperation()
         time.sleep(WAIT_TIME)
 
 def test_reconstruct(users: list[NetworkUser.MainUser], real_secret: Field):
@@ -46,14 +46,19 @@ def test_reconstruct(users: list[NetworkUser.MainUser], real_secret: Field):
 
 def main():
     num_users = int(input("Ingrese el número de usuarios a crear: "))
-    primo = 13
+    primo = 43112609
     
     users = create_users(num_users, primo)
     connect_users(users)
     test_connections(users)
     
     numbers = create_numbers(num_users, primo)
+    print("Compartiendo shares...")
     send_shares(users, numbers)
+
+    for user in users:
+        user.status()
+        print("\n")
     
     print("Compartiendo operaciones...")
     send_operations(users)
@@ -64,17 +69,11 @@ def main():
         real_secret *= num
     
     for i, user in enumerate(users):
-        print("Usuario", i+1,
-                "compartió los secretos: ", *numbers[i],
-                "tiene el secreto: ", user.reconstruct_secret().value,
-                "y debería tener: ",  real_secret.value,
-                "con input_shares: ", *user.input_shares,
-                "y multiplication_gates: ", *user.multiplication_gates,
-                "y final_shares: ", *user.final_shares,
-                sep="\n"
-              )
+        user.status()
         print("\n" * 2)
     
+    time.sleep(WAIT_TIME * 5)
+
     test_reconstruct(users, real_secret)
 
 if __name__ == "__main__":

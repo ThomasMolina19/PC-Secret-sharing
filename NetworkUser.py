@@ -8,7 +8,7 @@ from socket import socket as Socket, AF_INET, SOCK_STREAM
 from field_operations import Field
 
 import Protocol
-from NetworkProtocol import ShareProtocol, RequestConnectionProtocol, AcceptConectionProtocol, MessageProtocol, InputShareProtocol, FinalShareProtocol, ProductShareProtocol, NetworkProtocol, DELIMITADOR, SEPARADOR_IDENTIFICADOR
+from NetworkProtocol import RequestConnectionProtocol, AcceptConectionProtocol, MessageProtocol, InputShareProtocol, FinalShareProtocol, ProductShareProtocol, NetworkProtocol, DELIMITADOR, SEPARADOR_IDENTIFICADOR
 import Shamirss
 
 import time
@@ -55,7 +55,8 @@ class MainUser:
         self.client_context.load_verify_locations(CERT_FILE)
 
         self._input_shares: dict[str, Protocol.SharedVariable] = {}
-        self._multiplication_gates: dict[int, Protocol.MultiplicationGate] = {}
+        self.__multiplication_shares: dict[int, list[Protocol.MultiplicationVariable]] = {}
+        self.multiplication_results: list[Field] = []
         self.final_shares: list[Protocol.SharedVariable] = []
     
         self.server_thread: threading.Thread = threading.Thread(target=self.start_server, daemon=True)
@@ -85,7 +86,6 @@ class MainUser:
                     message, buffer = buffer.split(DELIMITADOR, 1)
                     self.receive(message)
             except Exception as e:
-                # TODO: Hacer PING PONG con toda la party para saber si se desconectó alguien
                 break
     
     @property
@@ -94,18 +94,15 @@ class MainUser:
     
     @property
     def input_shares(self) -> list[Protocol.SharedVariable]:
-        return list(sorted(self._input_shares.values(), key=lambda x: x.uuid))
+        return list(sorted(self._input_shares.values(), key=lambda x: x.sender))
     
-    @property
-    def multiplication_gates(self) -> list[Protocol.MultiplicationGate]:
-        return list(sorted(self._multiplication_gates.values(), key=lambda x: x.index))
+    def getMultiplicationShare(self, index: int) -> list[Protocol.MultiplicationVariable]:
+        if not index in self.__multiplication_shares:
+            return []
+        return list(sorted(self.__multiplication_shares[index], key=lambda x: x.sender))
     
-    def getGate(self, index: int) -> Protocol.MultiplicationGate:
-        gate: Protocol.MultiplicationGate | None = self._multiplication_gates.get(index)
-        if gate is None:
-            gate = Protocol.MultiplicationGate(self, index)
-            self._multiplication_gates[index] = gate
-        return gate
+    def addMultiplicationShare(self, share: Protocol.MultiplicationVariable):
+        self.__multiplication_shares.setdefault(share.operation_index, []).append(share)
 
     def log(self, message: str):
         print(f"\n[{self.uuid}] {message}")
@@ -169,11 +166,10 @@ class MainUser:
                     return
             Exception("Comando no reconocido")
         except Exception as e:
-            self.log(f"Mensaje con formato invalido ({message}): {e}")
             import traceback
             traceback.print_exc()
 
-    def send_number(self, numero: int, protocol: type[ShareProtocol] = InputShareProtocol, *args):
+    def send_number(self, numero: int, protocol: type[NetworkProtocol] = InputShareProtocol, *args) -> list[Field]:
         shamirss = Shamirss.ShamirSecretSharing(Field(numero, self.mod), len(self.party))
         shares = shamirss.generate_shares(self.t)
         for indice, uuid in enumerate(self.party):
@@ -181,40 +177,62 @@ class MainUser:
             share = shares[indice]
             protocol_instance = protocol(self)
             protocol_instance.send_message(user.host, share, *args)
-        
-        self.log(f"Enviando número {numero} a los usuarios conectados bajo el protocolo {protocol.identifier()}")
+        return shares
 
     def onReceiveInputShare(self, user: NetworkUser, share: Protocol.SharedVariable):
         self._input_shares[share.uuid] = share
-        self.log(f"Input recibido de {user.uuid}: {share}")
 
-    def onReceiveProductShare(self, user: NetworkUser, share: Protocol.SharedVariable, operation_index: int):
-        gate = self.getGate(operation_index)
-        gate.addShare(share)
-        self.log(f"Producto recibido de {user.uuid}: {share}")
+    def onReceiveProductShare(self, user: NetworkUser, share: Protocol.MultiplicationVariable, operation_index: int):
+        self.addMultiplicationShare(share)
 
-        secret = gate.real_value
-        if secret is not None:
-            self.log(f"Secreto reconstruido de la multiplicación: {secret}")
+        shares = self.getMultiplicationShare(operation_index)
 
-            # Si es la ultima operación, se envia el secreto final
-            if operation_index == len(self.multiplication_gates) - 1:
-                self.send_number(secret.value, FinalShareProtocol)
-            else:
-                self.sendGate(operation_index + 1)
+        if len(shares) == len(self.party):
+            result = Shamirss.ShamirSecretSharing.recuperar_secreto(shares) # type: ignore
+            self.multiplication_results.append(result) # S^p
+            if len(self.multiplication_results) < len(self.input_shares) - 1:
+                time.sleep(2.2)
+                self.sendOperation(operation_index + 1)
+            else: # result = T^p
+                time.sleep(2.2)
+                self.sendFinalShare(user)
     
+    def sendFinalShare(self, user: NetworkUser):
+        protocol = FinalShareProtocol(self)
+        protocol.send_message(user.host, self.multiplication_results[-1])
+
+
     def onReceiveFinalShare(self, user: NetworkUser, share: Protocol.SharedVariable):
+        if (share in self.final_shares):
+            return
         self.final_shares.append(share)
-        self.log(f"Secreto final recibido de {user.uuid}: {share}")
+        self.final_shares = list(sorted(self.final_shares, key=lambda x: x.sender))
+
+        self.log(f"Recibida parte final de {user.uuid}")
+
+        for user in self.party.values():
+            self.sendFinalShare(user)
         
-    def sendGate(self, index: int = 0):
-        self.log("gates" + ", ".join([str(gate) for gate in self.multiplication_gates]))
-        gate = self.getGate(index)
-        
-        self.log(f"Enviando operación {gate.index}")
-        self.send_number((gate.variables[0] * gate.variables[1]).value, ProductShareProtocol, gate.index)
+    def sendOperation(self, index: int = 0):
+        index = len(self.multiplication_results)
+        m = Protocol.Multiplication.generate_next_multiplication(self, self.multiplication_results, self.input_shares, index)
+        self.send_number(m.value, ProductShareProtocol, index)
+
 
     def reconstruct_secret(self) -> Field:
         if len(self.final_shares) < self.t:
             raise Exception("No hay suficientes partes para reconstruir el secreto.")
         return Shamirss.ShamirSecretSharing.recuperar_secreto(self.final_shares)
+    
+    def status(self):
+        print(f"Usuarios conectados: ")
+        for user in self.party.values():
+            print(f"  - {user.uuid} ({user.ip}:{user.port})")
+        print(f"Partes: ")
+        for share in self.input_shares:
+            print(f"  - {share}")
+        print("Operaciones: ")
+        for index in range(len(self.__multiplication_shares)):
+            print(f"  - Operación #{index}: ", *self.getMultiplicationShare(index))
+        print("Resultados: ", *self.multiplication_results)
+        print("Final Shares: ", *self.final_shares)

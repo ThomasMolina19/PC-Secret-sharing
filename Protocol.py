@@ -4,33 +4,45 @@ import NetworkUser
 import Shamirss
 
 class SharedVariable:
-    def __init__(self, value: Field, index: int, uuid: str | None = None):
+    def __init__(self, value: Field, sender: str, uuid: str | None = None):
         if uuid is None:
             uuid = str(UUID.uuid4())
         self.value = value
-        self.index = index
+        self.sender = sender
         self.uuid = uuid
 
     def __str__(self):
-        return f"[{self.uuid} from {str(self.index)}] = {self.value}"
+        return f"{self.value}"
+    
+    def __eq__(self, value: object) -> bool:
+        if not isinstance(value, SharedVariable):
+            return False
+        return self.value == value.value and self.sender == value.sender
+    
+class MultiplicationVariable(SharedVariable):
+    def __init__(self, variable: SharedVariable, operation_index: int = 0):
+        super().__init__(variable.value, variable.sender, variable.uuid)
+        self.operation_index = operation_index
 
-class MultiplicationGate():
-    def __init__(self, mainUser: "NetworkUser.MainUser", index: int) -> None:
-        self.mainUser: "NetworkUser.MainUser" = mainUser
-        a: Field | None = mainUser.input_shares[index].value if index == 0 else mainUser.multiplication_gates[index - 1].real_value
-        b: Field | None = mainUser.input_shares[index + 1].value
-        if a is None or b is None:
-            raise Exception(f"No se puede multiplicar sin el valor de: a={a} o b={b}")
-        self.variables: tuple[Field, Field] = (a, b)
-        self.shares: list[SharedVariable] = []
-        self.real_value: Field | None = None
-        self.index = index
+    def __str__(self):
+        return super().__str__() + f" [{self.sender}]"
 
-    def addShare(self, variable: "SharedVariable"):
-        self.shares.append(variable)
-        if (len(self.shares) > self.mainUser.t):
-            self.mainUser.log("Shares: " + ", ".join([str(var) for var in self.shares]))
-            self.real_value = Shamirss.ShamirSecretSharing.recuperar_secreto(self.shares)
+class Multiplication:
+    @staticmethod
+    def generate_next_multiplication(user: "NetworkUser.MainUser", multiplication_results: list[Field], input_shares: list[SharedVariable], index: int) -> Field:
+        """
+        Securely multiplies shares where party_values[i] contains all the shares that party i+1 has.
+        
+        Args:
+            party_values: List where each element represents all shares held by one party
+            prime: Prime number for the finite field
+            num_parties: Number of parties
+            degree: Degree of the polynomial
+        """
+        # Step 1: Each party performs local multiplication on their first two shares
+        a =  input_shares[0].value  if index == 0 else multiplication_results[-1]
+        b =  input_shares[1].value  if index == 0 else input_shares[index + 1].value
 
-    def __str__(self) -> str:
-        return f"MultiplicationGate({self.index}) = {self.real_value} from: " + ", ".join([str(var) for var in self.variables])
+        product = a * b
+        return product
+
