@@ -1,40 +1,7 @@
 from BiMultiplication import secure_multiplication_reorganized
 from Party import Party
 from Lagrange import lagrange_interpolation
-
-primo = 2**19 - 1 
-while True:
-    try:
-        # Get the number of players
-        cantidad_jugadores = int(input("Ingrese la cantidad de jugadores: "))
-        # Keep asking for the degree until valid
-        while True:
-            try:
-                grado = int(input("Grado del polinomio (Debe ser menor que la mitad del numero de jugadores): "))
-                
-                # Validate that degree is less than half the number of players
-                if grado < cantidad_jugadores/2:
-                    # Both inputs are valid, we can break out of both loops
-                    break
-                else:
-                    print(f"El grado debe ser menor que {cantidad_jugadores/2}. Intente de nuevo.")
-            except ValueError:
-                print("Por favor ingrese un número entero para el grado.")
-
-        # If we got here, both inputs are valid so we can break the outer loop
-        break
-        
-    except ValueError:
-        print("Por favor ingrese un número entero para la cantidad de jugadores.")
-
-# Variables are now properly set
-print(f"Configuración exitosa: {cantidad_jugadores} jugadores con polinomio de grado {grado}")
-
-p1 = Party(primo,cantidad_jugadores).generate_party(grado)
-reshared_party = Party(primo,cantidad_jugadores).send(p1)
-
-numbers = [fragment for fragment in reshared_party.values()]
-print(numbers)
+import argparse
 
 def secure_product_reorganized(party_values, prime, num_parties, degree):
     """
@@ -71,8 +38,72 @@ def secure_product_reorganized(party_values, prime, num_parties, degree):
     
     return result_shares
 
+def leer_archivo(input_file):
+    valores = []
+    try:
+        with open(input_file, "r") as archivo:
+            for linea in archivo:
+                lista_linea = []
+                elementos = linea.strip().split()
+                for elem in elementos:
+                    try:
+                        # Convertir cada elemento a entero
+                        lista_linea.append(int(elem))
+                    except ValueError:
+                        print(f"Advertencia: El elemento '{elem}' no se puede convertir a entero y se omitirá.")
+                valores.append(lista_linea)
+    except FileNotFoundError:
+        print(f"Error: El archivo '{input_file}' no existe.")
+        return None
+    return valores
 
-Resultado_encriptado = secure_product_reorganized(numbers,primo,cantidad_jugadores,grado)
-Resultado_encriptado = [(i+1,fragmento) for i, fragmento in enumerate(Resultado_encriptado)]
-Resultado_revelado = lagrange_interpolation(Resultado_encriptado,primo)
-print(f"El resultado es:  {Resultado_revelado}")
+def main():
+    # Set up command line argument parsing
+    parser = argparse.ArgumentParser(
+        description="Multiplicación segura de números usando MPC."
+    )
+    parser.add_argument("-f", "--file", required=True, help="Archivo con los números a multiplicar")
+    parser.add_argument("-p", "--prime", type=int, required=True, help="Número primo para el campo Z_p")
+    
+    args = parser.parse_args()
+    
+    # Read prime number from command line arguments
+    primo = args.prime
+    print(f"Usando el campo Z_{primo}")
+    
+    # Read numbers from file
+    numeros = leer_archivo(args.file)
+    if numeros is None:
+        return
+    
+    print(f"Números leídos del archivo: {numeros}")
+
+    for i, caso in enumerate(numeros):
+        print(f"Caso {i+1}")
+        cantidad_jugadores = len(caso)
+        while True:
+                try:
+                    grado = int(input("Grado del polinomio (Debe ser menor que la mitad del numero de jugadores): "))
+                    # Validate that degree is less than half the number of players
+                    if grado < cantidad_jugadores/2:
+                        # Both inputs are valid, we can break out of both loops
+                        break
+                    else:
+                        print(f"El grado debe ser menor que {cantidad_jugadores/2}. Intente de nuevo.")
+                except ValueError:
+                    print("Por favor ingrese un número entero para el grado.")
+        
+        # Variables are now properly set
+        print(f"Configuración exitosa: {cantidad_jugadores} jugadores con polinomio de grado {grado}")
+
+        p1 = Party(primo,cantidad_jugadores).generate_party(caso, grado)
+        reshared_party = Party(primo,cantidad_jugadores).send(p1)
+        numbers = [fragment for fragment in reshared_party.values()]
+
+        Resultado_encriptado = secure_product_reorganized(numbers,primo,cantidad_jugadores,grado)
+        Resultado_encriptado = [(i+1,fragmento) for i, fragmento in enumerate(Resultado_encriptado)]
+        Resultado_revelado = lagrange_interpolation(Resultado_encriptado,primo)
+        print(f"El resultado es:  {Resultado_revelado}")
+
+if __name__ == "__main__":
+    main()

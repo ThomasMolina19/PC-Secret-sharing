@@ -25,7 +25,7 @@ def secure_multiplication_reorganized(party_values, prime, num_parties, degree):
         product = Field(party_shares[0] * party_shares[1], prime).value
         local_products.append(product)
     
-    print(f"Local multiplications: {local_products}")
+    # print(f"Local multiplications: {local_products}")
     
     # Step 2: Each party secret-shares their local product
     party_shares = {}
@@ -33,11 +33,11 @@ def secure_multiplication_reorganized(party_values, prime, num_parties, degree):
         shamir = ShamirSecretSharing(prime, product, num_parties)
         party_shares[f"p_{i+1}"] = shamir.generate_shares(degree)
     
-    print(f"Shared local products: {party_shares}")
+    # print(f"Shared local products: {party_shares}")
     
     # Step 3: Securely send shares between parties
     party_shares = Party.send(party_shares)
-    print(f"Updated party shares after redistribution: {party_shares}")
+    # print(f"Updated party shares after redistribution: {party_shares}")
     
     # Step 4: Each party computes their share of the final product using Lagrange interpolation
     final_shares = []

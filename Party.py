@@ -7,17 +7,14 @@ class Party:
         self.field = field
         self.number_players = number_players
 
-    def generate_party(self,t):
+    def generate_party(self,secrets,t):
         n = self.number_players
-
         party_shares = {}
-        secrets = []
-
+        
         for i in range(1, n + 1):
             while True:
                 try:
-                    secret = int(input(f"Ingresa el numero del P{i}: "))
-                    secrets.append(Field(secret, self.field).value)
+                    secret = secrets[i-1]
                     break
                 except:
                     print("Ingrese un número válido.")
