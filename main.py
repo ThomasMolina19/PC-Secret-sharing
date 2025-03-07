@@ -91,6 +91,18 @@ class CommandHandler:
 
 
 def handle_console(ip: str | None, port: int | None, uuid: str | None = None):
+        """
+        Inicia el sistema de comunicación por consola.
+        Se crean un usuario principal y un manejador de comandos.
+        Se ejecuta el manejador de comandos.
+
+        En caso de que no se especifique la dirección IP o el puerto, se solicitan al usuario.
+        Si no se ingresan, se obtiene la dirección IP local del dispositivo, y se asigna un puerto aleatorio.
+
+        :param ip: Dirección IP del servidor.
+        :param port: Puerto del servidor.
+        :param uuid: UUID del usuario.
+        """
         import random
 
         if not ip:
@@ -113,6 +125,25 @@ def handle_console(ip: str | None, port: int | None, uuid: str | None = None):
         handler.run()
 
 def handle_file(file_path: str, ip: str | None = None, port: int | None = None, uuid: str | None = None):
+    """
+    Lee el archivo de conexiones y ejecuta las acciones correspondientes.
+    En caso de que se pasen los argumentos de IP, puerto y UUID, se crea un host con esos datos.
+    De lo contrario, trata de obtenerlo del propio archivo.
+    Si está especificado en el archivo, pero también se pasaron los argumentos, se usan los argumentos.
+
+    Realiza las siguientes acciones:
+    - Conectar con los usuarios.
+    - Enviar los shares.
+    - Enviar las operaciones.
+    - Reconstruir el secreto.
+
+    Opcionalmente, se puede mostrar el secreto esperado, aunque no es necesario.
+
+    :param file_path: Ruta del archivo de conexiones.
+    :param ip: Dirección IP del servidor.
+    :param port: Puerto del servidor.
+    :param uuid: UUID del usuario.
+    """
     import FileManager
     import time
 
@@ -157,6 +188,10 @@ def handle_file(file_path: str, ip: str | None = None, port: int | None = None, 
 
 
 def get_local_ip():
+        """
+        Obtiene la dirección IP local del dispositivo.
+        Se conecta a un servidor externo (Google DNS) para obtener la IP.
+        """
         try:
             import socket
             # Crear un socket temporal y conectarse a un servidor externo (Google DNS)
@@ -171,6 +206,20 @@ def get_local_ip():
 
 
 if __name__ == "__main__":
+    """
+    Cuando se ejecuta el script, se pueden pasar argumentos por consola.
+    Los argumentos disponibles son:
+    --ip: Dirección IP del servidor.
+    --port: Puerto del servidor.
+    --uuid: UUID del usuario.
+    --file: Archivo de conexiones.
+
+    En caso de que se pase un archivo, se ejecuta handle_file.
+    En caso contrario, se ejecuta handle_console.
+
+    handle_console: Inicia el sistema de comunicación por consola.
+    handle_file: Lee un archivo de conexiones y ejecuta las acciones correspondientes.
+    """
     import argparse
 
     parser = argparse.ArgumentParser(description="Sistema de comunicación segura.")
