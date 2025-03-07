@@ -66,7 +66,7 @@ El programa sigue estos pasos generales:
 - Luego, comparte el resultado de la multiplicación con los otros jugadores.
 - Finalmente, se utiliza la interpolación de Lagrange para reconstruir el resultado final.
 
-# Reconstrucción del secreto:
+**Reconstrucción del secreto: **
 - El programa reconstruye el secreto a partir de los "shares" utilizando la interpolación de Lagrange.
 
 # Flujo de ejecución
