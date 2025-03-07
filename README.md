@@ -96,6 +96,7 @@ El programa sigue estos pasos generales:
 - La multiplicación segura se realiza de manera distribuida, lo que garantiza que ningún jugador tenga acceso completo al secreto.
 
 **Concurrencia:**
+
 El programa no utiliza hilos o concurrencia explícita, pero está diseñado para ser ejecutado en un entorno distribuido donde cada jugador es una entidad independiente.
 
 **Interfaz de consola:**
