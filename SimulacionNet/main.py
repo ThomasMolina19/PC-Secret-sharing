@@ -75,14 +75,14 @@ def main():
     if numeros == None:
         return
     
-    print(f"Números leídos del archivo: {numeros}")
-
+    # Iterar sobre los casos de prueba
     for i, caso in enumerate(numeros):
-        print(f"Caso {i+1}")
+        print(f"Simulacion {i+1}")
         cantidad_jugadores = len(caso)
 
         while True:
             try:
+                print(f"Números leídos del archivo: {numeros[i]}")
                 grado = int(input(f"Elige el Grado del polinomio (Debe ser menor estrictamente que {cantidad_jugadores/2}): "))
                 if grado < cantidad_jugadores / 2:
                     break  # Grado polinomio válido, salir del bucle

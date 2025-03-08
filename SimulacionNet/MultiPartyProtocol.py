@@ -48,9 +48,6 @@ class Protocol:
             # Se crea un objeto Party (jugador) y se añade a la lista de jugadores
             players.append(Party(i, self.field, shares))
 
-        print("Fragmentos originales de los jugadores:")
-        for p in players:
-            print(p)
         
         # Llamamos a send_message para distribuir los fragmentos entre los jugadores
         self.send_message(players)
