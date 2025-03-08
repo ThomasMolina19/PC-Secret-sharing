@@ -1,6 +1,6 @@
 from field_operations import Field
 from Shamirss import ShamirSecretSharing
-from party0 import Party
+from Party import Party
 from BiMultiplication import secure_multiplication_reorganized
 from Lagrange import lagrange_interpolation
 class Protocol:
@@ -31,10 +31,9 @@ class Protocol:
 
         return players  # Modifica los jugadores directamente y los devuelve opcionalmente
 
-    def run_protocol(self, valores: list[int]):
+    def run_protocol(self, valores: list[int], t):
         n = self.number_players
         secrets = valores.copy()  # Usamos una copia para no modificar la lista original
-        t = n // 2
 
         players = []
         for i in range(1, n + 1):
@@ -48,24 +47,27 @@ class Protocol:
             print(f"{shares}\n")
             
             # Se crea un objeto Party y se añade a la lista de jugadores
-            players.append(Party(i, shares))
+            players.append(Party(i, self.field, shares))
 
         print("Fragmentos originales de los jugadores:")
         for p in players:
-            print(p)
+            print(p.shares)
         
         # Llamamos a send_message para distribuir los fragmentos
         self.send_message(players)
 
         print("\nFragmentos después de la reparticiónl:")
         for p in players:
-            print(p)
+            print(p.shares)
+        print(players)
 
-        a=secure_multiplication_reorganized(players, self.field, self.number_players, t)
+        players_shares = [p.shares for p in players]
+
+        a=secure_multiplication_reorganized(players_shares, self.field, self.number_players, t)
         
         print("Multiplicación segura de los fragmentos:")
         print(a)
 
-        return players  # Devuelve los jugadores con los fragmentos redistribuidos
+        return players_shares  # Devuelve los jugadores con los fragmentos redistribuidos
         
     

@@ -1,7 +1,8 @@
 from BiMultiplication import secure_multiplication_reorganized
-from party0 import Party
 from Lagrange import lagrange_interpolation
 import argparse
+from Party import Party
+from MultiPartyProtocol import Protocol
 
 def secure_product_reorganized(party_values, prime, num_parties, degree):
     """
@@ -81,29 +82,34 @@ def main():
     for i, caso in enumerate(numeros):
         print(f"Caso {i+1}")
         cantidad_jugadores = len(caso)
+
         while True:
-                try:
-                    grado = int(input("Grado del polinomio (Debe ser menor que la mitad del numero de jugadores): "))
-                    # Validate that degree is less than half the number of players
-                    if grado < cantidad_jugadores/2:
-                        # Both inputs are valid, we can break out of both loops
-                        break
-                    else:
-                        print(f"El grado debe ser menor que {cantidad_jugadores/2}. Intente de nuevo.")
-                except ValueError:
-                    print("Por favor ingrese un número entero para el grado.")
+            try:
+                grado = int(input("Grado del polinomio (Debe ser menor que la mitad del numero de jugadores): "))
+                if grado < cantidad_jugadores / 2:
+                    break  # Valid degree, exit loop
+                else:
+                    print(f"El grado debe ser menor que {cantidad_jugadores/2}. Intente de nuevo.")
+            except ValueError:
+                print("Por favor ingrese un número entero para el grado.")
         
-        # Variables are now properly set
         print(f"Configuración exitosa: {cantidad_jugadores} jugadores con polinomio de grado {grado}")
 
-        p1 = Party(primo,cantidad_jugadores).generate_party(caso, grado)
-        reshared_party = Party(primo,cantidad_jugadores).send(p1)
-        numbers = [fragment for fragment in reshared_party.values()]
+        # Use Protocol to create and distribute shares
+        protocolo = Protocol(primo, cantidad_jugadores)
+        parties = protocolo.run_protocol(caso, grado)  # `run_protocol` returns the Party objects
 
-        Resultado_encriptado = secure_product_reorganized(numbers,primo,cantidad_jugadores,grado)
-        Resultado_encriptado = [(i+1,fragmento) for i, fragmento in enumerate(Resultado_encriptado)]
-        Resultado_revelado = lagrange_interpolation(Resultado_encriptado,primo)
-        print(f"El resultado es:  {Resultado_revelado}")
+        # Extract shares from parties for secure multiplication
+        numbers = [party for party in parties]
+
+        # Perform secure multi-party multiplication
+        resultado_encriptado = secure_product_reorganized(numbers, primo, cantidad_jugadores, grado)
+
+        # Prepare shares for interpolation
+        resultado_encriptado = [(i + 1, fragmento) for i, fragmento in enumerate(resultado_encriptado)]
+        resultado_revelado = lagrange_interpolation(resultado_encriptado, primo)
+
+        print(f"El resultado es: {resultado_revelado}")
 
 if __name__ == "__main__":
     main()
