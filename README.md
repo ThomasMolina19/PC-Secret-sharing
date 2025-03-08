@@ -1,91 +1,63 @@
-# Explicacion Proyecto
+# Explicación del Proyecto
 
-Este proyecto tiene como objetivo implementar un protocolo de comunicación seguro que permite a n partes calcular conjuntamente una función (en este caso, el producto de números privados) sin revelar sus datos individuales. 
+Este proyecto tiene como objetivo implementar un protocolo de comunicación seguro que permite a *n* partes calcular conjuntamente una función (en este caso, el producto de números privados) sin revelar sus datos individuales.
 
-Las operaciones se realizan en un campo primo finito Zp, utilizando primos de Mersenne para optimizar la eficiencia de las operaciones modulares. El protocolo se basa en el esquema de Shamir Secret Sharing, donde cada parte genera y distribuye acciones (shares) de su dato privado, y posteriormente se reconstruye el secreto (el producto final) mediante interpolación de Lagrange.
+Las operaciones se realizan en un campo primo \(Z_p\), utilizando primos de Mersenne para optimizar la eficiencia de las operaciones. El protocolo se basa en *Secure Multiparty Computation (MPC)* y *Secret Sharing*, donde cada parte genera y distribuye fragmentos (*shares*) de su dato privado, y posteriormente se reconstruye el secreto (el producto final) mediante interpolación de Lagrange.
 
-Además, se utiliza una red P2P para modelar la comunicación entre las partes, permitiendo la transmisión segura de las acciones. 
+Además, se utiliza una simulacion local con objetos y tambien una red P2P para modelar la comunicación entre las partes, permitiendo la transmisión segura de las acciones.
 
-# Estructura del código
-El código está organizado en varios módulos y clases que trabajan juntos para implementar el protocolo de compartición de secretos y la multiplicación segura. Aquí hay una descripción de los componentes principales:
+---
 
-**Field:**
-- Representa un campo finito Zp, donde los cálculos se realizan módulo un número p.
-- Implementa operaciones básicas como suma, resta, multiplicación, potenciación y cálculo del inverso multiplicativo.
+## 🛠 Instalación y Dependencias de la Simulacion 
 
-**Polynomio:**
-- Representa un polinomio con coeficientes en un campo finito.
-- Permite generar polinomios aleatorios y evaluarlos en un punto específico.
+Para ejecutar la simulacion, solo necesitas tener **Python** instalado y contar con un archivo .txt que albergara los numeros que seran multiplicados
 
-**ShamirSecretSharing:**
-- Implementa el esquema de compartición de secretos de Shamir.
-- Genera shares (partes del secreto) utilizando un polinomio aleatorio.
-- Reconstruye el secreto a partir de las partes utilizando la interpolación de Lagrange.
+---
 
-**Party:**
-- Representa a una "parte" o "jugador" en el protocolo.
-- Almacena el ID del jugador y sus shares (fragmentos del secreto).
-- Proporciona un método para redistribuir los shares entre los jugadores.
 
-**Protocol:**
-- Es la clase principal que ejecuta el protocolo de compartición de secretos y la multiplicación segura.
-- Utiliza ShamirSecretSharing para generar los shares y secure_multiplication_reorganized para realizar la multiplicación segura.
+## 🛠 Instalación y Dependencias de la Red
 
-**secure_multiplication_reorganized:**
+Para ejecutar el proyecto, necesitas tener **Python** instalado y contar con los siguientes archivos:
 
-- Implementa la multiplicación segura entre las partes.
-- Cada parte realiza una multiplicación local de sus shares y luego comparte el resultado con las otras partes.
-- Utiliza la interpolación de Lagrange para reconstruir el resultado final.
+- Un archivo JSON (`config.json`) con las direcciones IP y los puertos de la red.
+- Un certificado SSL (cert.pem) y una clave privada (key.pem) para la comunicacíon segura.
+- Modulos de python como socket, uuid, ssl y json. 
 
-**lagrange_interpolation:**
-- Implementa la interpolación de Lagrange para reconstruir el secreto a partir de los shares.
+---
 
-**main.py:**
-- Es el punto de entrada del programa.
-- Lee un archivo de entrada con valores, los convierte en enteros y ejecuta el protocolo de compartición de secretos y multiplicación segura.
+## 🚀 Ejemplo de Uso de la simulacion
 
-# Funcionamiento del programa
-El programa sigue estos pasos generales:
+Ejecuta el programa con los siguientes parámetros:
 
-**Lectura del archivo de entrada:**
+```bash
+python3 main.py -f ”archivo.txt”
+```
 
-- El programa lee un archivo de texto que contiene valores numéricos.
-- Estos valores se convierten en enteros y se utilizan como los secretos iniciales.
+---
 
-**Inicialización del protocolo:**
+## 🔍 Explicación Técnica
 
-- Se crea una instancia de la clase Protocol con un campo primo y el número de jugadores.
-- Los valores leídos del archivo se utilizan como los secretos de cada jugador.
+### **Shamir Secret Sharing**
+Este protocolo divide un secreto en múltiples fragmentos (*shares*) y distribuye cada uno a diferentes jugadores. Solo un subconjunto suficiente de ellos puede reconstruir el secreto original.
 
-**Generación de "shares":**
-- Cada jugador genera shares de su secreto utilizando el esquema de Shamir Secret Sharing.
-- Estos shares se distribuyen entre los otros jugadores.
+### **Interpolación de Lagrange**
+Se usa para reconstruir un polinomio a partir de sus puntos conocidos, permitiendo recuperar el secreto después de las operaciones.
 
-**Multiplicación segura:**
-- Cada jugador realiza una multiplicación local de sus shares.
-- Luego, comparte el resultado de la multiplicación con los otros jugadores.
-- Finalmente, se utiliza la interpolación de Lagrange para reconstruir el resultado final.
+### **Comunicación P2P**
+Cada jugador intercambia mensajes con los demás a través de una red P2P, asegurando que las operaciones sean seguras y descentralizadas.
 
-**Reconstrucción del secreto:**
-- El programa reconstruye el secreto a partir de los shares utilizando la interpolación de Lagrange.
+---
 
-# Flujo de ejecución
-**Lectura del archivo:**
-- El programa lee un archivo de texto que contiene valores numéricos.
-- Estos valores se convierten en enteros y se almacenan en una lista.
+## ⚠️ Seguridad y Limitaciones
 
-**Inicialización del protocolo:**
-- Se crea una instancia de la clase Protocol con un campo primo y el número de jugadores.
-- Los valores leídos del archivo se utilizan como los secretos de cada jugador.
+- **Modelo de amenaza**: El protocolo asume que hay jugadores son honestos; si un atacante controla más de *t* partes, puede reconstruir el secreto.
+- **Eficiencia**: El uso de primos de Mersenne optimiza los cálculos, pero la sobrecarga de comunicación P2P puede ser alta en redes grandes.
 
-**Generación de "shares":**
-- Cada jugador genera shares de su secreto utilizando el esquema de Shamir Secret Sharing.
-- Estos shares se distribuyen entre los otros jugadores.
+---
 
-**Multiplicación segura:**
-- Cada jugador realiza una multiplicación local de sus shares.
-- Luego, comparte el resultado de la multiplicación con los otros jugadores.
-- Finalmente, se utiliza la interpolación de Lagrange para reconstruir el resultado final.
+## 📚 Referencias y Créditos
 
-**Reconstrucción del secreto:**
-- El programa reconstruye el secreto a partir de los "shares" utilizando la interpolación de Lagrange.
+- [Secure Multiparty Computation (MPC)](https://g.co/kgs/gPa7VQn)
+
+---
+
