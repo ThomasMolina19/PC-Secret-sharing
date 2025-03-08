@@ -89,12 +89,3 @@ El programa sigue estos pasos generales:
 
 **Reconstrucción del secreto:**
 - El programa reconstruye el secreto a partir de los "shares" utilizando la interpolación de Lagrange.
-
-# Detalles clave
-**Seguridad:**
-- El programa utiliza el esquema de Shamir Secret Sharing para garantizar que solo un subconjunto específico de partes puede reconstruir el secreto.
-- La multiplicación segura se realiza de manera distribuida, lo que garantiza que ningún jugador tenga acceso completo al secreto.
-
-**Interfaz de consola:**
-- El programa incluye una interfaz de consola para interactuar con el sistema.
-- Permite leer un archivo de entrada, ejecutar el protocolo y mostrar los resultados.
