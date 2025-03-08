@@ -19,26 +19,26 @@ El código está organizado en varios módulos y clases que trabajan juntos para
 
 **ShamirSecretSharing:**
 - Implementa el esquema de compartición de secretos de Shamir.
-- Genera "shares" (partes del secreto) utilizando un polinomio aleatorio.
+- Genera shares (partes del secreto) utilizando un polinomio aleatorio.
 - Reconstruye el secreto a partir de las partes utilizando la interpolación de Lagrange.
 
 **Party:**
 - Representa a una "parte" o "jugador" en el protocolo.
-- Almacena el ID del jugador y sus "shares" (fragmentos del secreto).
-- Proporciona un método para redistribuir los "shares" entre los jugadores.
+- Almacena el ID del jugador y sus shares (fragmentos del secreto).
+- Proporciona un método para redistribuir los shares entre los jugadores.
 
 **Protocol:**
 - Es la clase principal que ejecuta el protocolo de compartición de secretos y la multiplicación segura.
-- Utiliza ShamirSecretSharing para generar los "shares" y secure_multiplication_reorganized para realizar la multiplicación segura.
+- Utiliza ShamirSecretSharing para generar los shares y secure_multiplication_reorganized para realizar la multiplicación segura.
 
 **secure_multiplication_reorganized:**
 
 - Implementa la multiplicación segura entre las partes.
-- Cada parte realiza una multiplicación local de sus "shares" y luego comparte el resultado con las otras partes.
+- Cada parte realiza una multiplicación local de sus shares y luego comparte el resultado con las otras partes.
 - Utiliza la interpolación de Lagrange para reconstruir el resultado final.
 
 **lagrange_interpolation:**
-- Implementa la interpolación de Lagrange para reconstruir el secreto a partir de los "shares".
+- Implementa la interpolación de Lagrange para reconstruir el secreto a partir de los shares.
 
 **main.py:**
 - Es el punto de entrada del programa.
@@ -58,16 +58,16 @@ El programa sigue estos pasos generales:
 - Los valores leídos del archivo se utilizan como los secretos de cada jugador.
 
 **Generación de "shares":**
-- Cada jugador genera "shares" de su secreto utilizando el esquema de Shamir Secret Sharing.
-- Estos "shares" se distribuyen entre los otros jugadores.
+- Cada jugador genera shares de su secreto utilizando el esquema de Shamir Secret Sharing.
+- Estos shares se distribuyen entre los otros jugadores.
 
 **Multiplicación segura:**
-- Cada jugador realiza una multiplicación local de sus "shares".
+- Cada jugador realiza una multiplicación local de sus shares.
 - Luego, comparte el resultado de la multiplicación con los otros jugadores.
 - Finalmente, se utiliza la interpolación de Lagrange para reconstruir el resultado final.
 
 **Reconstrucción del secreto:**
-- El programa reconstruye el secreto a partir de los "shares" utilizando la interpolación de Lagrange.
+- El programa reconstruye el secreto a partir de los shares utilizando la interpolación de Lagrange.
 
 # Flujo de ejecución
 **Lectura del archivo:**
@@ -79,11 +79,11 @@ El programa sigue estos pasos generales:
 - Los valores leídos del archivo se utilizan como los secretos de cada jugador.
 
 **Generación de "shares":**
-- Cada jugador genera "shares" de su secreto utilizando el esquema de Shamir Secret Sharing.
-- Estos "shares" se distribuyen entre los otros jugadores.
+- Cada jugador genera shares de su secreto utilizando el esquema de Shamir Secret Sharing.
+- Estos shares se distribuyen entre los otros jugadores.
 
 **Multiplicación segura:**
-- Cada jugador realiza una multiplicación local de sus "shares".
+- Cada jugador realiza una multiplicación local de sus shares.
 - Luego, comparte el resultado de la multiplicación con los otros jugadores.
 - Finalmente, se utiliza la interpolación de Lagrange para reconstruir el resultado final.
 
@@ -95,11 +95,6 @@ El programa sigue estos pasos generales:
 - El programa utiliza el esquema de Shamir Secret Sharing para garantizar que solo un subconjunto específico de partes puede reconstruir el secreto.
 - La multiplicación segura se realiza de manera distribuida, lo que garantiza que ningún jugador tenga acceso completo al secreto.
 
-**Concurrencia:**
-
-El programa no utiliza hilos o concurrencia explícita, pero está diseñado para ser ejecutado en un entorno distribuido donde cada jugador es una entidad independiente.
-
 **Interfaz de consola:**
 - El programa incluye una interfaz de consola para interactuar con el sistema.
-
 - Permite leer un archivo de entrada, ejecutar el protocolo y mostrar los resultados.
