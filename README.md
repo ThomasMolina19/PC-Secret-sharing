@@ -1,10 +1,11 @@
 # Explicación del Proyecto
 
-Este proyecto tiene como objetivo implementar un protocolo de comunicación seguro que permite a *n* partes calcular conjuntamente una función (en este caso, el producto de números privados) sin revelar sus datos individuales.
+Este proyecto tiene como objetivo implementar un protocolo de comunicación seguro que permite a \( n \) partes calcular conjuntamente una función (en este caso, el producto de números privados) sin revelar sus datos individuales.
 
 Las operaciones se realizan en un campo primo \( \mathbb{Z}_p \), utilizando primos de Mersenne para optimizar la eficiencia de las operaciones. El protocolo se basa en *Secure Multiparty Computation (MPC)* y *Secret Sharing*, donde cada parte genera y distribuye fragmentos (*shares*) de su dato privado, y posteriormente se reconstruye el secreto (el producto final) mediante interpolación de Lagrange.
 
-Además, se utiliza una simulación local con objetos y también una red P2P para modelar la comunicación entre las partes, permitiendo la transmisión segura de las acciones.
+Además, se utiliza una simulación local con objetos y una red P2P para modelar la comunicación entre las partes, permitiendo la transmisión segura de las acciones.
+
 
 ---
 
