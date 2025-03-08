@@ -1,7 +1,6 @@
 from BiMultiplication import secure_multiplication_reorganized
 from Lagrange import lagrange_interpolation
 import argparse
-from Party import Party
 from MultiPartyProtocol import Protocol
 
 def secure_product_reorganized(party_values, prime, num_parties, degree):

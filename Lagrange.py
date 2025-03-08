@@ -1,5 +1,4 @@
 from field_operations import Field
-from Shamirss import ShamirSecretSharing
 
 def lagrange_interpolation(shares, prime):
     secret = Field(0, prime)

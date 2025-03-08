@@ -1,8 +1,6 @@
-from field_operations import Field
 from Shamirss import ShamirSecretSharing
 from Party import Party
-from BiMultiplication import secure_multiplication_reorganized
-from Lagrange import lagrange_interpolation
+
 class Protocol:
     def __init__(self, field: int, number_players: int):
         self.field = field
@@ -63,10 +61,10 @@ class Protocol:
 
         players_shares = [p.shares for p in players]
 
-        a=secure_multiplication_reorganized(players_shares, self.field, self.number_players, t)
+        # a=secure_multiplication_reorganized(players_shares, self.field, self.number_players, t)
         
-        print("Multiplicación segura de los fragmentos:")
-        print(a)
+        # print("Multiplicación segura de los fragmentos:")
+        # print(a)
 
         return players_shares  # Devuelve los jugadores con los fragmentos redistribuidos
         
