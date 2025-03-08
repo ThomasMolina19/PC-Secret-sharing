@@ -4,100 +4,88 @@ Este proyecto tiene como objetivo implementar un protocolo de comunicación segu
 
 Las operaciones se realizan en un campo primo finito Zp, utilizando primos de Mersenne para optimizar la eficiencia de las operaciones modulares. El protocolo se basa en el esquema de Shamir Secret Sharing, donde cada parte genera y distribuye acciones (shares) de su dato privado, y posteriormente se reconstruye el secreto (el producto final) mediante interpolación de Lagrange.
 
-Además, se simula una red P2P para modelar la comunicación entre las partes, permitiendo la transmisión segura de las acciones. 
+Además, se utiliza una red P2P para modelar la comunicación entre las partes, permitiendo la transmisión segura de las acciones. 
 
+# Estructura del código
+El código está organizado en varios módulos y clases que trabajan juntos para implementar el protocolo de compartición de secretos y la multiplicación segura. Aquí hay una descripción de los componentes principales:
 
-# Funcionamiento del programa
-**Creación de Usuarios y Conexión**
-- Se crean múltiples usuarios que se conectan entre sí en una red P2P simulada.
-- Cada usuario tiene un identificador único y comparte su dirección IP y puerto con los demás.
-
-**Generación de Acciones (Shares)**
-- Cada usuario genera un secreto (un número en el campo primo Zp).
-- Utiliza el esquema de Shamir para generar acciones (shares) del secreto.
-- Las acciones se distribuyen entre los demás usuarios.
-
-**Reconstrucción del Secreto**
-- Utilizando la interpolación de Lagrange para reconstruir el secreto a partir de las acciones recibidas.
-- El secreto se reconstruye evaluando el polinomio interpolado en x=0.
-
-**Operaciones en la Red**
-- Los usuarios se comunican mediante protocolos de red.
-- Cada protocolo maneja un tipo específico de mensaje (solicitud de conexión, envío de acciones, etc.).
-  
-# Estructura del codigo
-
-## Estructura General del Programa
-El programa está organizado en varios módulos y clases que trabajan juntos para implementar el protocolo de compartición de secretos. Los componentes principales son:
-
-**Campo Finito (Zp):**
-- Implementado en la clase Field.
-- Realiza operaciones aritméticas (suma, resta, multiplicación, potenciación, inverso) en un campo primo finito.
-
-**Esquema de Shamir:**
-- Implementado en la clase ShamirSecretSharing.
-- Genera acciones (shares) de un secreto y permite reconstruirlo mediante interpolación de Lagrange.
-
-**Interpolación de Lagrange:**
-- Implementada en la función lagrange_interpolation.
-- Reconstruye el secreto a partir de las acciones generadas.
-
-**Simulación de Red P2P:**
-- Implementada en las clases MainUser, NetworkUser, y protocolos de red (NetworkProtocol, RequestConnectionProtocol, etc.).
-- Simula una red entre múltiples usuarios para compartir acciones de manera segura.
-
-**Pruebas y Ejecución:**
-- Implementado en el archivo principal (main.py).
-- Permite crear usuarios, conectarlos, compartir secretos y reconstruirlos.
-  
-## Clases Principales
-  
 **Field:**
-- Representa un número en un campo primo finito Zp.
-- Implementa operaciones aritméticas y cálculo de inversos.
-
-**ShamirSecretSharing:**
-- Implementa el esquema de Shamir.
-- Genera acciones (shares) y reconstruye el secreto.
+- Representa un campo finito Zp, donde los cálculos se realizan módulo un número p.
+- Implementa operaciones básicas como suma, resta, multiplicación, potenciación y cálculo del inverso multiplicativo.
 
 **Polynomio:**
-- Representa un polinomio en el campo finito.
-- Se utiliza para generar acciones en el esquema de Shamir.
+- Representa un polinomio con coeficientes en un campo finito.
+- Permite generar polinomios aleatorios y evaluarlos en un punto específico.
 
-**MainUser:**
-- Representa un usuario en la red.
-- Maneja la conexión con otros usuarios, el envío y recepción de acciones, y la reconstrucción del secreto.
+**ShamirSecretSharing:**
+- Implementa el esquema de compartición de secretos de Shamir.
+- Genera shares (partes del secreto) utilizando un polinomio aleatorio.
+- Reconstruye el secreto a partir de las partes utilizando la interpolación de Lagrange.
 
-**NetworkProtocol:**
-- Clase base para los protocolos de red.
-- Define métodos para enviar y recibir mensajes.
+**Party:**
+- Representa a una "parte" o "jugador" en el protocolo.
+- Almacena el ID del jugador y sus shares (fragmentos del secreto).
+- Proporciona un método para redistribuir los shares entre los jugadores.
 
-**SharedVariable:**
-- Representa una acción (share) de un secreto.
-- Contiene el valor de la acción, su índice y un identificador único.
+**Protocol:**
+- Es la clase principal que ejecuta el protocolo de compartición de secretos y la multiplicación segura.
+- Utiliza ShamirSecretSharing para generar los shares y secure_multiplication_reorganized para realizar la multiplicación segura.
 
-## Protocolos de Red
-**RequestConnectionProtocol:**
-- Maneja las solicitudes de conexión entre usuarios.
+**secure_multiplication_reorganized:**
 
-**InputShareProtocol:**
-- Maneja el envío y recepción de acciones de entrada.
+- Implementa la multiplicación segura entre las partes.
+- Cada parte realiza una multiplicación local de sus shares y luego comparte el resultado con las otras partes.
+- Utiliza la interpolación de Lagrange para reconstruir el resultado final.
 
-**ProductShareProtocol:**
-- Maneja el envío y recepción de acciones de productos (multiplicaciones).
-
-**FinalShareProtocol:**
-- Maneja el envío y recepción de acciones finales (resultado de las operaciones).
-
-## Funciones Clave
 **lagrange_interpolation:**
-- Reconstruye el secreto a partir de las acciones utilizando interpolación de Lagrange.
+- Implementa la interpolación de Lagrange para reconstruir el secreto a partir de los shares.
 
-**generate_shares:**
-- Genera acciones (shares) de un secreto utilizando un polinomio aleatorio.
+**main.py:**
+- Es el punto de entrada del programa.
+- Lee un archivo de entrada con valores, los convierte en enteros y ejecuta el protocolo de compartición de secretos y multiplicación segura.
 
-**recuperar_secreto:**
-- Reconstruye el secreto a partir de las acciones utilizando interpolación de Lagrange.
+# Funcionamiento del programa
+El programa sigue estos pasos generales:
 
-**send_number:**
-- Envía un número (secreto o acción) a los demás usuarios utilizando un protocolo específico.
+**Lectura del archivo de entrada:**
+
+- El programa lee un archivo de texto que contiene valores numéricos.
+- Estos valores se convierten en enteros y se utilizan como los secretos iniciales.
+
+**Inicialización del protocolo:**
+
+- Se crea una instancia de la clase Protocol con un campo primo y el número de jugadores.
+- Los valores leídos del archivo se utilizan como los secretos de cada jugador.
+
+**Generación de "shares":**
+- Cada jugador genera shares de su secreto utilizando el esquema de Shamir Secret Sharing.
+- Estos shares se distribuyen entre los otros jugadores.
+
+**Multiplicación segura:**
+- Cada jugador realiza una multiplicación local de sus shares.
+- Luego, comparte el resultado de la multiplicación con los otros jugadores.
+- Finalmente, se utiliza la interpolación de Lagrange para reconstruir el resultado final.
+
+**Reconstrucción del secreto:**
+- El programa reconstruye el secreto a partir de los shares utilizando la interpolación de Lagrange.
+
+# Flujo de ejecución
+**Lectura del archivo:**
+- El programa lee un archivo de texto que contiene valores numéricos.
+- Estos valores se convierten en enteros y se almacenan en una lista.
+
+**Inicialización del protocolo:**
+- Se crea una instancia de la clase Protocol con un campo primo y el número de jugadores.
+- Los valores leídos del archivo se utilizan como los secretos de cada jugador.
+
+**Generación de "shares":**
+- Cada jugador genera shares de su secreto utilizando el esquema de Shamir Secret Sharing.
+- Estos shares se distribuyen entre los otros jugadores.
+
+**Multiplicación segura:**
+- Cada jugador realiza una multiplicación local de sus shares.
+- Luego, comparte el resultado de la multiplicación con los otros jugadores.
+- Finalmente, se utiliza la interpolación de Lagrange para reconstruir el resultado final.
+
+**Reconstrucción del secreto:**
+- El programa reconstruye el secreto a partir de los "shares" utilizando la interpolación de Lagrange.
