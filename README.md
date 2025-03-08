@@ -34,7 +34,7 @@ python3 main.py -f "archivo.txt"
 
 Para una guía más detallada sobre la ejecución del proyecto, consulta el siguiente documento dentro del repositorio:
 
-[Guía de Ejecución](./docs//Guia_de_Usuario.pdf)
+[Guía de Ejecución](./Guia_de_Usuario.pdf))
 
 ---
 

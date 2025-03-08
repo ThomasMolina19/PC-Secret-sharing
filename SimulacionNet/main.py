@@ -83,7 +83,7 @@ def main():
 
         while True:
             try:
-                grado = int(input("Grado del polinomio (Debe ser menor que la mitad del numero de jugadores): "))
+                grado = int(input(f"Elige el Grado del polinomio (Debe ser menor estrictamente que {cantidad_jugadores/2}): "))
                 if grado < cantidad_jugadores / 2:
                     break  # Grado polinomio válido, salir del bucle
                 else:
