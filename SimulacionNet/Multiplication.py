@@ -1,56 +1,43 @@
 from field_operations import Field
 from Shamirss import ShamirSecretSharing
-from Lagrange import lagrange_interpolation
 from Party import Party
+from MultiPartyProtocol import Protocol
+from Lagrange import lagrange_interpolation
 
-def secure_multiplication_reorganized(players: list, prime: int, num_parties: int, degree: int):
+def secure_multiplication_reorganized(party_values, prime, num_parties, degree):
     """
-    Securely multiplies shares where each Party object contains the shares.
+    Securely multiplies shares where party_values[i] contains all the shares that party i+1 has.
     
     Args:
-        players: List of Party objects
+        party_values: List where each element represents all shares held by one party
         prime: Prime number for the finite field
         num_parties: Number of parties
         degree: Degree of the polynomial
     """
-    # Ensure each party has at least 2 shares
-    if len(players[0].shares) < 2:
-        raise ValueError("Each party needs at least 2 shares for multiplication")
+    # Primero, necesitamos al menos dos acciones por parte para la multiplicación
+    if len(party_values[0]) < 2:
+        raise ValueError("Cada parte necesita al menos 2 acciones para la multiplicación")
     
-    # Step 1: Each party performs local multiplication on their first two shares
-    for player in players:
-        product = Field(player.shares[0] * player.shares[1], prime).value
-        player.shares = [product]  # Replace shares with the computed product
+    # Paso 1: Cada parte realiza la multiplicación local en sus dos primeras acciones
+    local_products = []
+    for party_shares in party_values:
+        product = Field(party_shares[0] * party_shares[1], prime).value
+        local_products.append(product)
     
-    print("Local multiplications:")
-    for player in players:
-        print(f"Player {player.player_id}: {player.shares}")
+    # Paso 2: Cada parte comparte secretamente su producto local
+    players = []
+    for i, product in enumerate(local_products):
+        shamir = ShamirSecretSharing(prime, product, num_parties)
+        shares = shamir.generate_shares(degree)
+        players.append(Party(i + 1, prime, shares))  # Usando la clase Party actualizada
     
-    # Step 2: Each party secret-shares their local product
-    for player in players:
-        shamir = ShamirSecretSharing(prime, player.shares[0], num_parties)
-        player.shares = shamir.generate_shares(degree)
+    # Paso 3: Enviar acciones de manera segura entre las partes usando el Protocolo
+    players = Protocol.send_message(players)
     
-    print("Shared local products:")
-    for player in players:
-        print(f"Player {player.player_id}: {player.shares}")
-    
-    # Step 3: Securely send shares between parties
-    Party.send(players)  # Redistribute shares
-    
-    print("Updated party shares after redistribution:")
-    for player in players:
-        print(f"Player {player.player_id}: {player.shares}")
-    
-    # Step 4: Each party computes their share of the final product using Lagrange interpolation
+    # Paso 4: Cada parte calcula su acción del producto final usando interpolación de Lagrange
+    final_shares = []
     for player in players:
         lagrange_data = [(i + 1, share) for i, share in enumerate(player.shares)]
-        player.shares = [lagrange_interpolation(lagrange_data, prime).value]  # Replace shares with final computed value
+        final_shares.append(lagrange_interpolation(lagrange_data, prime).value)
     
-    print("Final shares after Lagrange interpolation:")
-    for player in players:
-        print(f"Player {player.player_id}: {player.shares}")
-    
-    return players  # Returns the updated Party objects
-
-    
+    return final_shares
